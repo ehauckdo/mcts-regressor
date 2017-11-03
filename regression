@@ -5,7 +5,6 @@ import logging
 import optparse
 import random
 from MCTS.MCTS import MCTS 
-from ExpressionModule.ExpressionComponents import components as c
 from ExpressionModule.ExpressionHandler import ExpressionHandler
 from Utility.Utility import prepareLogDirectory
 
@@ -56,9 +55,8 @@ def main(args):
     if opt.seed != None:
         random.seed(opt.seed)
 
-    index = 0
     for i in range(opt.executions):
-        loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
+        loggingFolder = "logs/"+opt.folder+"/"+str(i)+"/"
         resetLoggingModule(loggingFolder)
         handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder, opt.lower, opt.upper, opt.points, opt.samples)
         handlerObject.maxSolutionSize = opt.depth
@@ -66,7 +64,6 @@ def main(args):
 
         mcts = MCTS(handlerObject, opt.iterations)
         mcts.run()
-        index += 1
 
 if __name__ == '__main__':
     main(sys.argv[1:])
