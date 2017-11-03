@@ -47,16 +47,16 @@ class SearchNode(object):
         node.backup(reward)
 
     def treePolicy(self):
-        logging.info("Executing Tree Policy...")
+        logging.debug("Executing Tree Policy...")
         selectedNode = self
          
         while selectedNode.children:
             if selectedNode.fullyExpanded is False:
-                logging.info("Expanding node:"+"\n".join(self.handler.printComponents(selectedNode.components)))
-                logging.info("Number of uninitialized children: "+str(len(selectedNode.getUninitializedChildren())))
+                logging.debug("Expanding node:"+"\n".join(self.handler.printComponents(selectedNode.components)))
+                logging.debug("Number of uninitialized children: "+str(len(selectedNode.getUninitializedChildren())))
                 expandedNode = selectedNode.expand()
                 if len(selectedNode.getUninitializedChildren()) == 0:
-                    logging.info("This node is now fully expanded.")
+                    logging.debug("This node is now fully expanded.")
                     selectedNode.fullyExpanded = True
                 selectedNode = expandedNode
                 break
@@ -66,7 +66,7 @@ class SearchNode(object):
         return selectedNode
 
     def uct(self):
-        logging.info("Calculating UCT from node depth "+str(self.depth))
+        logging.debug("Calculating UCT from node depth "+str(self.depth))
         selected_node = self
         selected_node_value = None
         best_value = -sys.maxint
@@ -94,8 +94,7 @@ class SearchNode(object):
             raise ValueError('No node was selected in UCT')
 
         self.handler.partialSolution.append(selected_node_value)
-        #logging.info("Selected node by UCT: "+self.handler.printComponents(selected_node.components))
-        logging.info("Selected node by UCT: \n"+"\n".join(self.handler.printComponents(selected_node.components)))
+        logging.debug("Selected node by UCT: \n"+"\n".join(self.handler.printComponents(selected_node.components)))
         return selected_node
 
     def expand(self):
@@ -106,11 +105,11 @@ class SearchNode(object):
         newChild = SearchNode(self.handler, self, [selectedComponent])
         self.children[selectedComponent] = newChild
         
-        logging.info("Expanded child: "+"\n".join(self.handler.printComponents(newChild.components)))
+        logging.debug("Expanded child: "+"\n".join(self.handler.printComponents(newChild.components)))
         return newChild
 
     def rollOut(self):
-        logging.info("Executing rollout...")
+        logging.debug("Executing rollout...")
         current_depth = self.depth
         componentHolder = copy.deepcopy(self.handler.partialSolution)
         

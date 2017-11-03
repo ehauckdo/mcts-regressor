@@ -34,20 +34,21 @@ def parseArgs(args):
         help="Number of equally spaced points between upper and lower bounds", default=100)
     parser.add_option('--samples', action="store", type="int", dest="samples",
         help="Number of samples to be selected from domain", default=50)
+    parser.add_option('--verbose', action="store_true", dest="verbose",
+        help="Log everything during execution")
    
     (opt, args) = parser.parse_args()
     return opt
 
-
 # For multiple executions of MCTS, remove the current logging handler
 # and create a new one pointing to a log file in the appropriate folder
-def resetLoggingModule(folder):
+def resetLoggingModule(folder, loggingLevel):
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
     
     prepareLogDirectory(folder)
     prepareLogDirectory(folder+"iterations/")
-    logging.basicConfig(filename=folder+"log",level=logging.INFO, filemode='w')
+    logging.basicConfig(filename=folder+"log",level=loggingLevel, filemode='w')
 
 def main(args):
     opt = parseArgs(args)
@@ -57,10 +58,9 @@ def main(args):
 
     for i in range(opt.executions):
         loggingFolder = "logs/"+opt.folder+"/"+str(i)+"/"
-        resetLoggingModule(loggingFolder)
+        resetLoggingModule(loggingFolder, logging.DEBUG if opt.verbose == True else logging.INFO)
         handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder, opt.lower, opt.upper, opt.points, opt.samples)
         handlerObject.maxSolutionSize = opt.depth
-        #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
 
         mcts = MCTS(handlerObject, opt.iterations)
         mcts.run()

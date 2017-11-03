@@ -53,7 +53,7 @@ class ExpressionHandler(SolutionHandler):
             for var in self.variables:
                 sample.append(random.choice(testValues))
             self.samples.append(sample)
-        logging.info("Samples: "+",".join(self.samples))
+        logging.info("Samples: "+",".join(str(s) for s in self.samples))
 
     def initializeStatistics(self):
         self.statistics = {}
