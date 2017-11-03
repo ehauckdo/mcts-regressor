@@ -9,18 +9,12 @@ from sklearn.metrics import mean_squared_error
 from MCTS.SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
 from ExpressionModule.ExpressionComponents import initializeComponentVariables, components, components_reversed
-from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
     def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, points=100, numberSamples=50):
-        #self.objective = objective
         self.partialSolution = []
-        #self.loggingDirectory = "logs/"+folder+"/" 
         self.loggingDirectory = folder 
-        #prepareLogDirectory(self.loggingDirectory)
-        #prepareLogDirectory(self.loggingDirectory+"iterations/")
-        #logging.basicConfig(self.loggingDirectory+"/log",level=logging.INFO, filemode='w')
         self.maxSolutionSize = 5 
         self.lower = lower
         self.upper = upper
@@ -32,7 +26,6 @@ class ExpressionHandler(SolutionHandler):
         self.variables = initializeComponentVariables(variables)
         self.initializeSamples()
         self.setObjective(objective)
-        #self.y_true = self.executeTree(self.buildTree(objective)) 
 
     def setObjective(self, objective):
         if type(objective) is list:
@@ -53,7 +46,6 @@ class ExpressionHandler(SolutionHandler):
         self.logExpression(self.objective, "objective.csv", self.y_true)
 
     def initializeSamples(self):
-        #random.seed(1)
         testValues = np.linspace(self.lower, self.upper, self.points)
         self.samples = []
         for i in range(self.numberSamples):
@@ -61,12 +53,12 @@ class ExpressionHandler(SolutionHandler):
             for var in self.variables:
                 sample.append(random.choice(testValues))
             self.samples.append(sample)
-        logging.info(self.samples)
+        logging.info("Samples: "+",".join(self.samples))
 
     def initializeStatistics(self):
         self.statistics = {}
         self.statistics["bestSolution"] = None
-        self.statistics["bestError"] = np.inf #sys.maxint
+        self.statistics["bestError"] = np.inf 
         self.statistics["iterations"] = 0
 
     def getPossibleChildren(self, partialSolution):
@@ -96,14 +88,8 @@ class ExpressionHandler(SolutionHandler):
         partialSolution.append(random.choice(terminals_possible))
         return True
 
-
     def getRolloutReward(self, partialSolution):
         mse = self.getMSE(partialSolution)
-        
-        # this is just for safety, infinities should have
-        # been handled in getMSE 
-        #mse = sys.maxint if np.isinf(mse) else mse
-        #mse = -sys.maxint if np.isneginf(mse) else mse      
         
         self.statistics["iterations"] +=1
 
@@ -122,18 +108,13 @@ class ExpressionHandler(SolutionHandler):
                 self.zeroErrorSolution.append(partialSolution)
                 self.zeroErrorSolutionHashs.append(solutionHash)
 
-        #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
-        #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
         reward = 1 /(1+mse)            
-
         return reward
 
     def getMSE(self, partialSolution):
         rootNode = self.buildTree(partialSolution)
         y_pred = self.executeTree(rootNode)
 
-        #logging.info(", ".join(["{0:.2f}".format(elem) for elem in y_pred]))
-        #logging.info(y_pred)
         # if a nan is found in the function results, return biggest error possible
         if (np.isnan(y_pred).any()):
             return sys.maxint
@@ -141,9 +122,8 @@ class ExpressionHandler(SolutionHandler):
         # if there are any infinities, we change then to max int
         y_pred = np.clip(y_pred, -sys.maxint, sys.maxint)
 
-        #logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
-        logging.info("MSE: "+str(mse))
+        logging.debug("MSE: "+str(mse))
         return mse
     
     def buildTree(self, partialSolution):
@@ -155,20 +135,11 @@ class ExpressionHandler(SolutionHandler):
 
     def executeTree(self, rootNode):
         y_pred = []
-
         # random sampling
         for sample in self.samples:
             varValues = dict(zip(self.variables, sample))
             expressionResult = rootNode.execute(varValues)
             y_pred.append(expressionResult)
-            #logging.info(varValues)
-
-        #testValues = np.linspace(self.lower, self.upper, self.points)
-        # homogeneous, equally-spaced sampling
-        #for v in testValues:
-        #    expressionResult = rootNode.execute({"x":v})
-        #    y_pred.append(expressionResult)
-        
         return y_pred
 
     def getNumberTerminalsAllowed(self, partialSolution=None):
@@ -202,11 +173,6 @@ class ExpressionHandler(SolutionHandler):
 
         string = []
         for i in range(len(partialSolution)):
-            #try:
-            #    component = partialSolution[i].value.__name__
-            #except:
-            #    component = str(partialSolution[i].value)
-            #string.append(str(partialSolution[i]))
             string.append(components_reversed[str(partialSolution[i])])
         return string
 
@@ -218,7 +184,6 @@ class ExpressionHandler(SolutionHandler):
         with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
             f.write("{0:.5f}".format(mse)+"\n")
-            
             f.write("\n".join([' '.join([str(s) for s in x])+" "+str(fx) for x, fx in zip(self.samples, y_pred)]))
 
     def logSearch(self):

@@ -16,23 +16,6 @@ class ExpressionComponent(object):
     def __hash__(self):
         return hash(str(self))
 
-def div(x, y):
-    if y == 0: return 0
-    return x/y
-
-def ln(x):
-    if x <= 0: return 0
-    return np.log(x)
-   
-def pow(x, y):
-    if x < 0 and int(y) != y:
-        x = abs(x)
-    if x == 0 and y < 0:
-       return 0
-    if int(x) == x and int(y) == y and y < 0:
-        y = float(y)
-    return np.power(x, y)
-
 def initializeComponentVariables(numberVar):
     if numberVar > 26:
          raise ValueError("Expressions with more than 26 variables are not currently acceptable")
@@ -57,8 +40,7 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "cos": ExpressionComponent(np.cos, 1),
                 "sin": ExpressionComponent(np.sin, 1),
                 "pow": ExpressionComponent(np.power, 2),
-                "ln": ExpressionComponent(np.log, 1)
-                }
+                "ln": ExpressionComponent(np.log, 1) }
 
 # a reverse mapping to facilitate readable expression constrution
 components_reversed = {str(v): k for k, v in components.iteritems()}

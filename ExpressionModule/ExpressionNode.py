@@ -24,7 +24,6 @@ class ExpressionNode(object):
 
     def execute(self, variables={}):
         returnValue = None
-   
         try:
             if self.arity == 0:
                 if self.value in variables.keys():
@@ -38,15 +37,10 @@ class ExpressionNode(object):
 
             if self.arity == 1:
                 returnValue = self.value(self.children[0].execute(variables))
-                #return self.value(self.children[0].execute(variables))
 
             if self.arity == 2:
                 returnValue = self.value(self.children[0].execute(variables), self.children[1].execute(variables))
-                #return self.value(self.children[0].execute(variables), self.children[1].execute(variables))
-        
         except:
             returnValue = nan
-          
-
         return returnValue
 
