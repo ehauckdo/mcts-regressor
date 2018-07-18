@@ -30,19 +30,50 @@ class Node(object):
         rollout_terminals = self.terminals
         rollout_operators = self.operators
 
+        rollout_operators_needed = max_height/2
+        rollout_terminals_allowed = 0
+
+        self.pushOperator(rollout_stack)
+        rollout_operators_needed -= 1
+        rollout_terminals_allowed = 2
+        rollout_operators += 1
+        
+        
         while len(rollout_stack) < max_height:
-            if rollout_operators >= max_height/2:
-                self.pushTerminal(rollout_stack)
-                rollout_terminals += 1
-            elif rollout_terminals == rollout_operators + 1:
+
+            if rollout_terminals_allowed == 0:
                 self.pushOperator(rollout_stack)
+                rollout_operators_needed -= 1
+                rollout_terminals_allowed += 1
                 rollout_operators += 1
+               
+            elif rollout_operators_needed == 0:
+                self.pushTerminal(rollout_stack)
+                rollout_terminals_allowed -= 1
+                rollout_terminals += 1
             else:
                 term = self.pushAny(rollout_stack)
                 if term in terminals:
+                    rollout_terminals_allowed -= 1
                     rollout_terminals += 1
                 else:
+                    rollout_operators_needed -= 1
+                    rollout_terminals_allowed += 1
                     rollout_operators += 1
+
+
+            #if rollout_operators >= max_height/2:
+            #    self.pushTerminal(rollout_stack)
+            #    rollout_terminals += 1
+            #elif rollout_terminals == rollout_operators + 1:
+            #    self.pushOperator(rollout_stack)
+            #    rollout_operators += 1
+            #else:
+            #    term = self.pushAny(rollout_stack)
+            #    if term in terminals:
+            #        rollout_terminals += 1
+            #    else:
+            #        rollout_operators += 1
 
             print("rollout_stack: ", rollout_stack) 
             print("number of terminals", rollout_terminals) 
