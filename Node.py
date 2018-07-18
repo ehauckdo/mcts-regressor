@@ -34,6 +34,9 @@ class Node(object):
             if rollout_operators >= max_height/2:
                 self.pushTerminal(rollout_stack)
                 rollout_terminals += 1
+            elif rollout_terminals == rollout_operators + 1:
+                self.pushOperator(rollout_stack)
+                rollout_operators += 1
             else:
                 term = self.pushAny(rollout_stack)
                 if term in terminals:
