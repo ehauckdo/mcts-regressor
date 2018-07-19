@@ -1,8 +1,9 @@
 import random
+from sympy import symbols
 
-operators = ["+", "-"]
+operators = ["+", "-","/","*","sin","^"] 
 terminals = [1, "x"]
-max_height = 5
+max_height = 9
 
 class Node(object):
     
@@ -14,15 +15,24 @@ class Node(object):
         self.visits = 0;
         self.reward = 0;
         self.fullyExpanded = False
-        self.children = None;
+        self.children = {};
         self.rollOut()
+        x, y = symbols('x y')
+        expr = x + y
+        print(expr / 2)
 
     def iteration(self):
         node = treePolicy()
 
     def treePolicy(self):
-        # selected a node from the tree to expand
-        return self
+        selected_node = self
+        if self.fullyExpanded is False:
+            # call expand
+            pass
+        else
+            #call uct
+            pass    
+        return selected_node
 
     def rollOut(self):
         # execute rollout and return Reward
@@ -60,20 +70,6 @@ class Node(object):
                     rollout_operators_needed -= 1
                     rollout_terminals_allowed += 1
                     rollout_operators += 1
-
-
-            #if rollout_operators >= max_height/2:
-            #    self.pushTerminal(rollout_stack)
-            #    rollout_terminals += 1
-            #elif rollout_terminals == rollout_operators + 1:
-            #    self.pushOperator(rollout_stack)
-            #    rollout_operators += 1
-            #else:
-            #    term = self.pushAny(rollout_stack)
-            #    if term in terminals:
-            #        rollout_terminals += 1
-            #    else:
-            #        rollout_operators += 1
 
             print("rollout_stack: ", rollout_stack) 
             print("number of terminals", rollout_terminals) 
