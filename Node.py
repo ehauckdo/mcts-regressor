@@ -16,8 +16,11 @@ class Operator(object):
     def isUnary(self):
         return self.isUnary
 
-operators = []#["+", "-","/","*","^","sin"]
+terminals = [1, "x"]
+max_height = 9
+random.seed(3)
 
+operators = []
 operators.append(Operator("+", False))
 operators.append(Operator("-", False))
 operators.append(Operator("/", False))
@@ -25,11 +28,6 @@ operators.append(Operator("-", False))
 operators.append(Operator("^", False))
 operators.append(Operator("sin", True))
 
-terminals = [1, "x"]
-max_height = 9
-
-
-operators.append(Operator("+", False))
 class Node(object):
     
     def __init__(self):
@@ -65,7 +63,6 @@ class Node(object):
         rollout_terminals = self.terminals
         rollout_operators = self.operators
 
-        rollout_operators_needed = max_height/2
         rollout_terminals_allowed = 0
         rollout_terminals_needed = 0
         
@@ -74,9 +71,6 @@ class Node(object):
             rollout_terminals_needed = 1
         else:
             rollout_terminals_needed = 2
-        #rollout_operators_needed -= 1
-        #rollout_terminals_needed -= 1
-        rollout_terminals_allowed = 2
         rollout_operators += 1
         
         print("rollout_stack: ", rollout_stack)
