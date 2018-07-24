@@ -12,10 +12,6 @@ class Node(object):
         self.value = value
         self.depth = 0 if parent == None else parent.depth + 1
         
-        self.terminals = 0
-        self.operators = 0
-        self.terminals_needed = 0 if parent == None else parent.terminals_needed
-
         # MCTS related fields
         self.visits = 0;
         self.reward = 0;
@@ -40,7 +36,8 @@ class Node(object):
         
     def iteration(self):
         node = self.treePolicy()
-        node.rollOut()
+        score = node.rollOut()
+        node.backup(score)
 
     def treePolicy(self):
         selected_node = self
@@ -97,7 +94,7 @@ class Node(object):
 
         return 0
 
-    def backup(self, node, reward):
+    def backup(self, reward):
         # update all nodes up to the root
         return None
 
