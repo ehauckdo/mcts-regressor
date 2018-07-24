@@ -1,136 +1,99 @@
 import random
 from sympy import symbols
 
-class Operator(object):
-
-    def __init__(self, name, unary):
-        self.operator = name
-        self.isUnary = unary
-     
-    def __str__(self):
-        return self.operator
-    
-    def __repr__(self):
-        return self.operator
-    
-    def isUnary(self):
-        return self.isUnary
-
-terminals = [1, "x"]
-max_height = 9
-random.seed(3)
-
-operators = []
-operators.append(Operator("+", False))
-operators.append(Operator("-", False))
-operators.append(Operator("/", False))
-operators.append(Operator("-", False))
-operators.append(Operator("^", False))
-operators.append(Operator("sin", True))
+production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "sin(E)", "I"],
+                     "I": ["x", 1, 2]}
+max_height = 5
 
 class Node(object):
     
-    def __init__(self):
-        self.value = []
+    def __init__(self, parent=None, value="E"):
+        self.parent = parent
+        self.value = value
+        self.depth = 0 if parent == None else parent.depth + 1
+        
         self.terminals = 0
         self.operators = 0
+        self.terminals_needed = 0 if parent == None else parent.terminals_needed
 
+        # MCTS related fields
         self.visits = 0;
         self.reward = 0;
         self.fullyExpanded = False
         self.children = {};
-        self.rollOut()
-        x, y = symbols('x y')
-        expr = x + y
-        print(expr / 2)
-
+        self.initializeChildrenToNull()
+    
+    def initializeChildrenToNull(self):
+        if self.value.find("E") != -1:
+            term = "E"
+        elif self.value.find("I") != -1:
+            term = "I"
+        else:
+            return
+        indexes = list([pos for pos, char in enumerate(self.value) if char == term])
+        for index in indexes:
+            for item in production_rules[term]:
+                self.children[(index, item)] = None
+    
+        #print("Possible children for the current node: ") 
+        #for child in self.children: print(child)
+        
     def iteration(self):
-        node = treePolicy()
+        node = self.treePolicy()
+        node.rollOut()
 
     def treePolicy(self):
         selected_node = self
+
+        #while 
         if self.fullyExpanded is False:
-            # call expand
+            selected_node = self.expand()
             pass
         else:
             #call uct
             pass    
         return selected_node
 
+    # OK
+    def expand(self):
+        # expand the tree
+        possible_expansions = [k for k,v in self.children.items() if v == None]
+        if len(possible_expansions) == 0:
+            return
+
+        #print("Possible expansions for the current node: ")
+        #for item in possible_expansions: print(item)
+        selected_expansion = random.choice(possible_expansions)
+        #print("Selected expansion: "+str(selected_expansion))
+        index = selected_expansion[0]
+        term = selected_expansion[1]
+        new_expression = self.value[:index] + str(term) + self.value[index + 1:]
+        #print("New Expression after expansion: "+new_expression)
+        new_node = Node(self, new_expression) 
+        self.children[selected_expansion] = new_node
+
+        if len(possible_expansions) == 1:
+            self.fullyExpanded = True
+
+        return self.children[selected_expansion]
+
+    # OK?
     def rollOut(self):
         # execute rollout and return Reward
-        rollout_stack = list(self.value)
-        rollout_terminals = self.terminals
-        rollout_operators = self.operators
-
-        rollout_terminals_allowed = 0
-        rollout_terminals_needed = 0
+        print("Executing rollout for the expression "+self.value)
+        current_depth = self.depth
+        current_expr = self.value
+        old_expr = ""
         
-        op = self.pushOperator(rollout_stack)
-        if op.isUnary:
-            rollout_terminals_needed = 1
-        else:
-            rollout_terminals_needed = 2
-        rollout_operators += 1
-        
-        print("rollout_stack: ", rollout_stack)
-        print("number of terminals: ", rollout_terminals) 
-        print("number of operators: ", rollout_operators)
-        print("number of terminals needed: ", rollout_terminals_needed)
-        print("")
-        
-        while len(rollout_stack) < max_height:
+        while current_depth < max_height and current_expr != old_expr:
+            old_expr = current_expr
+            current_expr = self.expandExpressionRandomly(current_expr)
+            current_depth += 1
 
-            if rollout_terminals_needed >= max_height - len(rollout_stack):
-               self.pushTerminal(rollout_stack)
-               rollout_terminals_needed -= 1 
-               rollout_terminals += 1
-
-            elif rollout_terminals_needed == 0:
-               self.pushOperator(rollout_stack)
-               rollout_terminals_needed += 1
-               rollout_operators += 1
-
-            else:
-                term = self.pushAny(rollout_stack)
-                if term in terminals:
-                    rollout_terminals_needed -= 1
-                    rollout_terminals += 1
-                else:
-                    if term.isUnary == False:
-                        rollout_terminals_needed += 1
-                    rollout_operators += 1
-                
-            
-            #if rollout_terminals_needed == 0:
-            #    term = self.pushOperator(rollout_stack)
-            #    
-
-            #if rollout_terminals_allowed == 0:
-            #    self.pushOperator(rollout_stack)
-            #    rollout_operators_needed -= 1
-            #    rollout_terminals_allowed += 1
-            #    rollout_operators += 1
-            #   
-            #elif rollout_operators_needed == 0:
-            #    self.pushTerminal(rollout_stack)
-            #    rollout_terminals_allowed -= 1
-            #    rollout_terminals += 1
-            #else:
-            #    term = self.pushAny(rollout_stack)
-            #    if term in terminals:
-            #        rollout_terminals_allowed -= 1
-            #        rollout_terminals += 1
-            #    else:
-            #        rollout_operators_needed -= 1
-            #        rollout_terminals_allowed += 1
-            #        rollout_operators += 1
-
-            print("rollout_stack: ", rollout_stack)
-            print("number of terminals: ", rollout_terminals) 
-            print("number of operators: ", rollout_operators)
-            print("number of terminals needed: ", rollout_terminals_needed)
-            print("")
+        #print("Expression before Terminals: "+current_expr)
+        current_expr = self.substituteAllTerms(current_expr)
+        #print("Expression after Terminals: "+current_expr)
+        print("Rollouted expression: "+current_expr)
 
         return 0
 
@@ -138,23 +101,42 @@ class Node(object):
         # update all nodes up to the root
         return None
 
-    def expand(self):
-        if self.fullyExpanded != True:
-            # expand the tree
-            return
 
-    def pushTerminal(self, stack):
-        term = random.choice(terminals)
-        stack.append(term)
-        return term
+    def expandExpressionRandomly(self, expr):
+        #print("Expression to be expanded: "+ expr)
+        indexes = list([pos for pos, char in enumerate(expr) if char == "E"])
+        if len(indexes) == 0:
+            return expr
+        #print("indexes of Es: "+ str(indexes))
+        chosen_index = random.choice(indexes)
+        #print("Chosen index: " + str(chosen_index))
+        chosen_production_rule = random.choice(production_rules["E"])
+        #print("Chosen production rule: "+ str(chosen_production_rule))
+        new_expr = expr[:chosen_index] + str(chosen_production_rule) + expr[chosen_index + 1:]
+        #print("New expression: "+new_expr)
+        return new_expr
 
-    def pushOperator(self, stack):
-        term = random.choice(operators)
-        stack.append(term)
-        return term
+    def expandExpression(self, expr, pr, term):
+        #print("Expression to be expanded: "+ expr)
+        indexes = list([pos for pos, char in enumerate(expr) if char == term])
+        if len(indexes) == 0:
+            return expr
+        #print("indexes of Es: "+ str(indexes))
+        chosen_index = random.choice(indexes)
+        #print("Chosen index: " + str(chosen_index))
+        chosen_production_rule = random.choice(pr[term])
+        #print("Chosen production rule: "+ str(chosen_production_rule))
+        new_expr = expr[:chosen_index] + str(chosen_production_rule) + expr[chosen_index + 1:]
+        #print("New expression: "+new_expr)
+        return new_expr
 
-    def pushAny(self, stack):
-        candidates = operators + terminals 
-        term = random.choice(candidates)
-        stack.append(term)
-        return term
+    def substituteAllTerms(self, expr):
+        expr = expr.replace("E", "I")
+        index = expr.find("I")
+        while index != -1:
+            chosen_production_rule = random.choice(production_rules["I"])
+            expr = expr[:index] + str(chosen_production_rule) + expr[index + 1:]
+            index = expr.find("I")
+
+        return expr
+

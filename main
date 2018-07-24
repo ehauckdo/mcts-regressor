@@ -2,11 +2,14 @@
 
 import sys
 from Node import * 
+from sympy import sympify, symbols
+from sympy.parsing.sympy_parser import parse_expr
 
 def main(args):
     n = Node()
-    print("Hello World")
-    print(n.visits)
+    for i in range(5):
+        n.iteration()
+    
 
 if __name__ == '__main__':
     main(sys.argv[1:])
