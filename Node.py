@@ -1,4 +1,5 @@
 import random
+import math
 from sympy import symbols
 
 production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "(E ^ I)", "sin(E)", "I"],
@@ -15,6 +16,7 @@ class Node(object):
         # MCTS related fields
         self.visits = 0;
         self.reward = 0;
+        self.C = math.sqrt(2)
         self.fullyExpanded = False
         self.initializeChildren()
     
@@ -51,8 +53,32 @@ class Node(object):
             selected_node = self.expand()
             pass
         else:
-            #call uct
+            selected_node = self.uct()
             pass    
+        return selected_node
+
+    def uct(self):
+        print("Executing UCT")
+        selected_node = self
+        best_value = -9999 # fix that later!!
+    
+        for key in self.children.keys():
+            child_node = self.children[key]
+            total_reward = child_node.reward
+            child_value = total_reward / child_node.visits
+
+            uct_value = child_value + self.C * math.sqrt(math.log(self.visits) / child_node.visits)
+            
+            uct_value = uct_value # apply some noise here to break ties
+
+            if uct_value > best_value:
+                selected_node = child_node
+                best_value = uct_value
+
+        if selected_node == None:
+            raise ValueError('No node was selected in UCT')
+    
+        print("Selected node: "+selected_node.value)
         return selected_node
 
     # OK

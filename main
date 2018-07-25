@@ -7,9 +7,9 @@ from sympy.parsing.sympy_parser import parse_expr
 
 def main(args):
     n = Node()
-    for i in range(5):
+    for i in range(10):
         n.iteration()
-        print(n.visits, n.reward) 
+        print(n.visits, n.reward)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
