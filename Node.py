@@ -1,7 +1,7 @@
 import random
 from sympy import symbols
 
-production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "sin(E)", "I"],
+production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "(E ^ I)", "sin(E)", "I"],
                      "I": ["x", 1, 2]}
 max_height = 5
 
@@ -16,16 +16,21 @@ class Node(object):
         self.visits = 0;
         self.reward = 0;
         self.fullyExpanded = False
-        self.children = {};
-        self.initializeChildrenToNull()
+        self.initializeChildren()
     
-    def initializeChildrenToNull(self):
+    def initializeChildren(self):
+        self.children = {};
+        # check if there's E expressions, set those to expand
         if self.value.find("E") != -1:
             term = "E"
+        # otherwise, check if there's I expressions, set those to expand
         elif self.value.find("I") != -1:
             term = "I"
         else:
+            # if there's no expessions to be expanded, do not initialize children 
             return
+
+        # each child has the key of (Expression_Index_Position, Production_Rule_Applied)
         indexes = list([pos for pos, char in enumerate(self.value) if char == term])
         for index in indexes:
             for item in production_rules[term]:
@@ -42,7 +47,6 @@ class Node(object):
     def treePolicy(self):
         selected_node = self
 
-        #while 
         if self.fullyExpanded is False:
             selected_node = self.expand()
             pass
@@ -96,6 +100,12 @@ class Node(object):
 
     def backup(self, reward):
         # update all nodes up to the root
+        node = self
+        while node != None:
+            node.visits += 1
+            node.reward += reward
+            # do we normalize the reward...?
+            node = node.parent
         return None
 
 
