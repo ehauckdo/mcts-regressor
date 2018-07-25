@@ -1,4 +1,5 @@
 import random
+import sys
 import math
 from sympy import symbols
 
@@ -17,6 +18,7 @@ class Node(object):
         self.visits = 0;
         self.reward = 0;
         self.C = math.sqrt(2)
+        self.bounds = [sys.maxint, -sys.maxint]
         self.fullyExpanded = False
         self.initializeChildren()
     
@@ -37,7 +39,7 @@ class Node(object):
         for index in indexes:
             for item in production_rules[term]:
                 self.children[(index, item)] = None
-    
+        
         #print("Possible children for the current node: ") 
         #for child in self.children: print(child)
         
@@ -49,18 +51,20 @@ class Node(object):
     def treePolicy(self):
         selected_node = self
 
-        if self.fullyExpanded is False:
-            selected_node = self.expand()
-            pass
-        else:
-            selected_node = self.uct()
-            pass    
+        while selected_node.depth < max_height:
+            if selected_node.fullyExpanded is False:
+                print("Expanding node "+selected_node.value)
+                selected_node = selected_node.expand()
+                print("Expansion selected "+selected_node.value)
+                return selected_node
+                pass
+            else:
+                selected_node = selected_node.uct()
         return selected_node
 
     def uct(self):
-        print("Executing UCT")
         selected_node = self
-        best_value = -9999 # fix that later!!
+        best_value = -sys.maxint 
     
         for key in self.children.keys():
             child_node = self.children[key]
@@ -78,16 +82,17 @@ class Node(object):
         if selected_node == None:
             raise ValueError('No node was selected in UCT')
     
-        print("Selected node: "+selected_node.value)
+        print("Selected node by UCT: "+selected_node.value)
         return selected_node
 
     # OK
     def expand(self):
         # expand the tree
+        print("Children: "+str(self.children))
         possible_expansions = [k for k,v in self.children.items() if v == None]
         if len(possible_expansions) == 0:
-            return
-
+            return self # must find a way to ignore explored branches!!
+        
         #print("Possible expansions for the current node: ")
         #for item in possible_expansions: print(item)
         selected_expansion = random.choice(possible_expansions)
@@ -122,7 +127,14 @@ class Node(object):
         #print("Expression after Terminals: "+current_expr)
         print("Rollouted expression: "+current_expr)
 
-        return 0
+        reward = int(random.random()*10) # properly calculate reward!!
+        print("Reward: "+str(reward))
+        if reward < self.bounds[0]:
+            self.bounds[0] = reward    
+        elif reward > self.bounds[1]:
+            self.bounds[1] = reward
+
+        return reward 
 
     def backup(self, reward):
         # update all nodes up to the root
