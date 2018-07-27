@@ -1,11 +1,11 @@
 import random
 import sys
 import math
-from sympy import symbols, sympify
+from sympy import symbols, sympify, oo, zoo, nan
 from sklearn.metrics import mean_squared_error
 
 objective = sympify("x^2 + 4*x + 1")
-print(objective)
+#print(objective)
 production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "(E ^ I)", "sin(E)", "x", "I"],
                      "I": [ 1, 2]}
 max_height = 5
@@ -133,22 +133,26 @@ class Node(object):
         symbol = symbols('x') # find a way to parse all the symbols in expr!!
         sympy_expr = sympify(current_expr)
 
-        #sympy_expr = sympify("((((2 + 2) + 2) * 2) ^ x)")
         print(sympy_expr)
-        #print(sympy_expr.subs({'x':1.0}))
-        #sys.exit() 
         y_pred = []
         y_true = []
 
         test_value = -10
         while test_value <= 10:
-            #print("%.2f, %.2f" % (sympy_expr.subs({'x':test_value}), objective.subs({'x':test_value}))) 
+            value = sympy_expr.subs({'x':test_value})
+            try:
+                print("%.2f, %.2f" % (sympy_expr.subs({'x':test_value}), objective.subs({'x':test_value}))) 
+            # if found division by zero, ignore
+            except ValueError:
+                pass
             y_pred.append(sympy_expr.subs({'x':test_value}))
             y_true.append(objective.subs({'x':test_value}))
             test_value += 0.5
 
+
         mse = mean_squared_error(y_true, y_pred)
         reward = mse
+        #reward = random.random()
 
         #print("Reward: "+str(reward))
         if reward < self.bounds[0]:
