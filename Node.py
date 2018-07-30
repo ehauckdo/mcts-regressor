@@ -1,14 +1,11 @@
 import random
 import sys
 import math
+from ProductionRules import *
 from sympy import symbols, sympify, oo, zoo, nan
 from sklearn.metrics import mean_squared_error
 
-objective = sympify("x^2 + 4*x + 1")
-#print(objective)
-production_rules = { "E": ["(E + E)", "(E - E)", "(E / E)", "(E * E)", "(E ^ I)", "sin(E)", "x", "I"],
-                     "I": [ 1, 2]}
-max_height = 5
+max_height = 4
 
 class Node(object):
     
@@ -16,7 +13,11 @@ class Node(object):
         self.parent = parent
         self.value = value
         self.depth = 0 if parent == None else parent.depth + 1
+        self.highest_reward = [-1, None]
         
+        if parent != None:
+            self.objective = parent.objective
+    
         # MCTS related fields
         self.visits = 0;
         self.reward = 0;
@@ -56,9 +57,9 @@ class Node(object):
 
         while selected_node.depth < max_height:
             if selected_node.fullyExpanded is False:
-                print("Expanding node "+selected_node.value)
+                #print("Expanding node "+selected_node.value)
                 selected_node = selected_node.expand()
-                print("Expansion selected "+selected_node.value)
+                #print("Expansion selected "+selected_node.value)
                 return selected_node
                 pass
             else:
@@ -85,13 +86,12 @@ class Node(object):
         if selected_node == None:
             raise ValueError('No node was selected in UCT')
     
-        print("Selected node by UCT: "+selected_node.value)
+        #print("Selected node by UCT: "+selected_node.value)
         return selected_node
 
-    # OK
     def expand(self):
         # expand the tree
-        print("Children: "+str(self.children))
+        #print("Children: "+str(self.children))
         possible_expansions = [k for k,v in self.children.items() if v == None]
         if len(possible_expansions) == 0:
             return self # must find a way to ignore explored branches!!
@@ -112,102 +112,69 @@ class Node(object):
 
         return self.children[selected_expansion]
 
-    # OK?
     def rollOut(self):
         # execute rollout and return Reward
-        print("Executing rollout for the expression "+self.value)
+        #print("Executing rollout for the expression "+self.value)
         current_depth = self.depth
         current_expr = self.value
         old_expr = ""
         
         while current_depth < max_height and current_expr != old_expr:
             old_expr = current_expr
-            current_expr = self.expandExpressionRandomly(current_expr)
+            current_expr = expandExpressionRandomly(current_expr)
             current_depth += 1
 
         #print("Expression before Terminals: "+current_expr)
-        current_expr = self.substituteAllTerms(current_expr)
+        current_expr = substituteAllTerms(current_expr)
         #print("Expression after Terminals: "+current_expr)
-        print("Rollouted expression: "+current_expr)
+        #print("Rollouted expression: "+current_expr)
 
         symbol = symbols('x') # find a way to parse all the symbols in expr!!
         sympy_expr = sympify(current_expr)
 
-        print(sympy_expr)
+        #print(sympy_expr)
         y_pred = []
         y_true = []
 
         test_value = -10
         while test_value <= 10:
             value = sympy_expr.subs({'x':test_value})
-            try:
-                print("%.2f, %.2f" % (sympy_expr.subs({'x':test_value}), objective.subs({'x':test_value}))) 
+            #try:
+                #print("%.2f, %.2f, " % (sympy_expr.subs({'x':test_value}), objective.subs({'x':test_value})))
             # if found division by zero, ignore
-            except ValueError:
-                pass
+            #except ValueError:
+            #    pass
             y_pred.append(sympy_expr.subs({'x':test_value}))
-            y_true.append(objective.subs({'x':test_value}))
+            y_true.append(self.objective.subs({'x':test_value}))
             test_value += 0.5
 
 
         mse = mean_squared_error(y_true, y_pred)
-        reward = mse
+        try:
+            reward = [1/mse, sympy_expr]
+        except:
+            reward = [1, sympy_expr]
         #reward = random.random()
-
         #print("Reward: "+str(reward))
-        if reward < self.bounds[0]:
-            self.bounds[0] = reward    
-        elif reward > self.bounds[1]:
-            self.bounds[1] = reward
-
         return reward 
 
     def backup(self, reward):
         # update all nodes up to the root
         node = self
         while node != None:
+
+            if reward[0] > self.highest_reward[0]:
+                self.highest_reward[0] = reward[0]
+                self.highest_reward[1] = reward[1]
+
+            if reward[0] < self.bounds[0]:
+                self.bounds[0] = reward[0]  
+            elif reward[0] > self.bounds[1]:
+                self.bounds[1] = reward[0]
+            
             node.visits += 1
-            node.reward += reward
+            node.reward += reward[0]
             # do we normalize the reward...?
             node = node.parent
         return None
-
-
-    def expandExpressionRandomly(self, expr):
-        #print("Expression to be expanded: "+ expr)
-        indexes = list([pos for pos, char in enumerate(expr) if char == "E"])
-        if len(indexes) == 0:
-            return expr
-        #print("indexes of Es: "+ str(indexes))
-        chosen_index = random.choice(indexes)
-        #print("Chosen index: " + str(chosen_index))
-        chosen_production_rule = random.choice(production_rules["E"])
-        #print("Chosen production rule: "+ str(chosen_production_rule))
-        new_expr = expr[:chosen_index] + str(chosen_production_rule) + expr[chosen_index + 1:]
-        #print("New expression: "+new_expr)
-        return new_expr
-
-    def expandExpression(self, expr, pr, term):
-        #print("Expression to be expanded: "+ expr)
-        indexes = list([pos for pos, char in enumerate(expr) if char == term])
-        if len(indexes) == 0:
-            return expr
-        #print("indexes of Es: "+ str(indexes))
-        chosen_index = random.choice(indexes)
-        #print("Chosen index: " + str(chosen_index))
-        chosen_production_rule = random.choice(pr[term])
-        #print("Chosen production rule: "+ str(chosen_production_rule))
-        new_expr = expr[:chosen_index] + str(chosen_production_rule) + expr[chosen_index + 1:]
-        #print("New expression: "+new_expr)
-        return new_expr
-
-    def substituteAllTerms(self, expr):
-        expr = expr.replace("E", "I")
-        index = expr.find("I")
-        while index != -1:
-            chosen_production_rule = random.choice(production_rules["I"])
-            expr = expr[:index] + str(chosen_production_rule) + expr[index + 1:]
-            index = expr.find("I")
-
-        return expr
 
