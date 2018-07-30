@@ -155,17 +155,15 @@ class Node(object):
         except:
             reward = [1, sympy_expr]
         #reward = random.random()
-        #print("Reward: "+str(reward))
         return reward 
 
     def backup(self, reward):
         # update all nodes up to the root
         node = self
         while node != None:
-
-            if reward[0] > self.highest_reward[0]:
-                self.highest_reward[0] = reward[0]
-                self.highest_reward[1] = reward[1]
+            if reward[0] > node.highest_reward[0]:
+                node.highest_reward[0] = reward[0]
+                node.highest_reward[1] = reward[1]
 
             if reward[0] < self.bounds[0]:
                 self.bounds[0] = reward[0]  
