@@ -6,7 +6,8 @@ from sympy import sympify, symbols
 from sympy.parsing.sympy_parser import parse_expr
 
 def main(args):
-    mcts = MCTS("x^2 + 4*x + 1", 50000)
+    #mcts = MCTS("x^2 + 4*x + 1",1000)
+    mcts = MCTS("x^2 + 1", 1000)
     mcts.run()     
 
 if __name__ == '__main__':

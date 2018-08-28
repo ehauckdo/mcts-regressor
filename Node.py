@@ -6,6 +6,7 @@ from sympy import symbols, sympify, oo, zoo, nan
 from sklearn.metrics import mean_squared_error
 
 max_height = 4
+log = True 
 
 class Node(object):
     
@@ -13,7 +14,7 @@ class Node(object):
         self.parent = parent
         self.value = value
         self.depth = 0 if parent == None else parent.depth + 1
-        self.highest_reward = [-1, None]
+        self.highest_reward = [-sys.maxint, None]
         
         if parent != None:
             self.objective = parent.objective
@@ -27,6 +28,7 @@ class Node(object):
         self.initializeChildren()
     
     def initializeChildren(self):
+        print_log("Possible children for the current node ("+self.value+", depth "+str(self.depth)+"): ", log) 
         self.children = {};
         # check if there's E expressions, set those to expand
         if self.value.find("E") != -1:
@@ -36,6 +38,8 @@ class Node(object):
             term = "I"
         else:
             # if there's no expessions to be expanded, do not initialize children 
+            if log:
+                print_log("None", log)
             return
 
         # each child has the key of (Expression_Index_Position, Production_Rule_Applied)
@@ -43,10 +47,10 @@ class Node(object):
         for index in indexes:
             for item in production_rules[term]:
                 self.children[(index, item)] = None
-        
-        #print("Possible children for the current node: ") 
-        #for child in self.children: print(child)
-        
+       
+         
+        for child in self.children: print_log(child, log)
+
     def iteration(self):
         node = self.treePolicy()
         score = node.rollOut()
@@ -57,9 +61,9 @@ class Node(object):
 
         while selected_node.depth < max_height:
             if selected_node.fullyExpanded is False:
-                #print("Expanding node "+selected_node.value)
+                #print_log("Expanding node "+selected_node.value, log)
                 selected_node = selected_node.expand()
-                #print("Expansion selected "+selected_node.value)
+                print_log("Expansion selected "+selected_node.value, log)
                 return selected_node
                 pass
             else:
@@ -69,12 +73,19 @@ class Node(object):
     def uct(self):
         selected_node = self
         best_value = -sys.maxint 
-    
+   
+        print_log("Calculating UCT from node "+selected_node.value+", with depth "+str(selected_node.depth), log)
+ 
         for key in self.children.keys():
             child_node = self.children[key]
+
+
             total_reward = child_node.reward
             child_value = total_reward / child_node.visits
-
+            child_value = normalize(child_value, self.bounds[0], self.bounds[1])
+            print_log("Bounds: "+str(self.bounds[0])+", "+str(self.bounds[1]), log)
+            print_log("Checking child "+child_node.value+", visits in this node: "+str(child_node.visits)+", raw_reward: "+str(child_node.reward)+", normalized_reward: "+str(child_value), log)
+            
             uct_value = child_value + self.C * math.sqrt(math.log(self.visits) / child_node.visits)
             
             uct_value = uct_value # apply some noise here to break ties
@@ -119,17 +130,17 @@ class Node(object):
         current_expr = self.value
         old_expr = ""
         
-        while current_depth < max_height and current_expr != old_expr:
+        while current_depth < self.depth+1: #and current_expr != old_expr:
             old_expr = current_expr
             current_expr = expandExpressionRandomly(current_expr)
             current_depth += 1
 
-        #print("Expression before Terminals: "+current_expr)
+        print_log("Expression before Terminals: "+current_expr, log)
         current_expr = substituteAllTerms(current_expr)
-        #print("Expression after Terminals: "+current_expr)
-        #print("Rollouted expression: "+current_expr)
+        print_log("Expression after Terminals: "+current_expr, log)
+        print_log("Rollouted expression: "+current_expr, log)
+        #raw_input("...")
 
-        symbol = symbols('x') # find a way to parse all the symbols in expr!!
         sympy_expr = sympify(current_expr)
 
         #print(sympy_expr)
@@ -150,26 +161,35 @@ class Node(object):
 
 
         mse = mean_squared_error(y_true, y_pred)
-        try:
-            reward = [1/mse, sympy_expr]
-        except:
-            reward = [1, sympy_expr]
+        mse = -mse
+        reward = [mse, sympy_expr]
+        #if mse == 0:
+        #    reward = [1, sympy_expr]
+        #else:
+        #    reward = [1/mse, sympy_expr]
+        print_log("Reward from rollout: "+str(reward), log)
+        #try:
+        #    reward = [1/mse, sympy_expr]
+        #except:
+        #    print("Found reward one!")
+        #    reward = [1, sympy_expr]
         #reward = random.random()
         return reward 
 
     def backup(self, reward):
         # update all nodes up to the root
         node = self
+        print_log("Backing up reward.", log)
         while node != None:
             if reward[0] > node.highest_reward[0]:
                 node.highest_reward[0] = reward[0]
                 node.highest_reward[1] = reward[1]
 
-            if reward[0] < self.bounds[0]:
-                self.bounds[0] = reward[0]  
-            elif reward[0] > self.bounds[1]:
-                self.bounds[1] = reward[0]
-            
+            if reward[0] < node.bounds[0]:
+                node.bounds[0] = reward[0]  
+            if reward[0] > node.bounds[1]:
+                node.bounds[1] = reward[0]
+            print_log("Updated bounds in node "+str(node.value)+": "+str(node.bounds[0])+", "+str(node.bounds[1]), log)
             node.visits += 1
             node.reward += reward[0]
             # do we normalize the reward...?
