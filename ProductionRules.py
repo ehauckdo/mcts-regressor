@@ -47,10 +47,12 @@ def substituteAllTerms(expr):
     return expr
 
 def normalize(x, min_value, max_value):
-    normalized = x - min_value
-    normalized = normalized / (max_value - min_value)
-    return normalized
-    
+    if min_value < max_value:
+        normalized = (x - min_vaue) / (max_value - min_value)
+        return normalized
+    else
+        return x   
+ 
 def print_log(text, shouldPrint):
     if shouldPrint:
         print(text)
