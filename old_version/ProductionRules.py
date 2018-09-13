@@ -1,4 +1,5 @@
 import random
+import math
   
 production_rules = { "E": ["(E + E)", "(E - E)", "(E * E)", "(E ^ I)", "sin(E)", "x", "I"],
                      "I": [ 1, 2]}
@@ -52,7 +53,33 @@ def normalize(x, min_value, max_value):
         return normalized
     else:
         return x   
+
+
+def add(x, y):
+    return x + y
  
+
+def subtract(x,y):
+    return x - y
+
+def multiply(x,y):
+    return x * y
+
+def power(x,y):
+    return x**y
+
+def sin(x):
+    return math.sin(x)
+
+
+a = add
+s = subtract
+m = multiply
+p = power
+si = sin
+
+rules = {1, 2, "x", a,s,m,p,si}
+
 def print_log(text, shouldPrint):
     if shouldPrint:
         print(text)

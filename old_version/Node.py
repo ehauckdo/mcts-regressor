@@ -5,8 +5,8 @@ from ProductionRules import *
 from sympy import symbols, sympify, oo, zoo, nan
 from sklearn.metrics import mean_squared_error
 
-max_height = 4
-log = True 
+max_height = 3
+log = False 
 
 class Node(object):
     
@@ -195,4 +195,16 @@ class Node(object):
             # do we normalize the reward...?
             node = node.parent
         return None
+
+    def bestChild(self):
+        best_child = None
+        most_visits = 0
+        for key in self.children.keys():
+            if self.children[key] == None:
+                continue 
+            if self.children[key].visits > most_visits:
+                best_child = self.children[key]
+                most_visits = self.children[key].visits
+
+        return self if best_child == None else best_child
 
