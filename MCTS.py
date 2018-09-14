@@ -1,14 +1,14 @@
 from SearchNode import SearchNode
 from PartialSolution import *
-from copy import deepcopy
+from Utility import *
 
 class MCTS(object):
 
     def __init__(self, objective="", iterations=1500):
         self.objective = objective
-        empty_part_sol = deepcopy(objective)
         self.iterations = iterations
-        self.root = SearchNode(None, empty_part_sol)
+        empty_solution = instantiateNewObject(objective)
+        self.root = SearchNode(None, empty_solution)
         self.root.objective = objective
         
     def run(self):

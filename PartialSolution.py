@@ -19,7 +19,7 @@ class PartialSolution(object):
 class PartialExpression(PartialSolution):
 
     def __init__(self, value={}):
-        self.value = {}
+        self.value = value
 
     def addComponent(self, component):
         self.value.append(component) # we can build a tree here

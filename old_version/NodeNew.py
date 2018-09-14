@@ -83,5 +83,3 @@ class NodeNew(object):
 
     def backup(self, reward):
         return
-
-    
