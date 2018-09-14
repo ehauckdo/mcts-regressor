@@ -14,3 +14,13 @@ def instantiateNewObject(obj):
     new_instance = deepcopy(obj)
     new_instance.value = {}
     return new_instance
+
+def instantiateNewObject(obj):
+    import importlib
+    module_name = obj.__module__
+    class_name = type(obj).__name__
+
+    MyClass = getattr(importlib.import_module(module_name), class_name)
+    instance = MyClass()
+    return instance
+

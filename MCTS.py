@@ -1,15 +1,13 @@
 from SearchNode import SearchNode
-from PartialSolution import *
+from SolutionHandler import *
 from Utility import *
+import importlib
 
 class MCTS(object):
 
-    def __init__(self, objective="", iterations=1500):
-        self.objective = objective
+    def __init__(self, handler=SolutionHandler(), iterations=1500):
         self.iterations = iterations
-        empty_solution = instantiateNewObject(objective)
-        self.root = SearchNode(None, empty_solution)
-        self.root.objective = objective
+        self.root = SearchNode(handler)
         
     def run(self):
         for i in range(self.iterations):

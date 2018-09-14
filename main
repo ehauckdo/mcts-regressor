@@ -2,14 +2,16 @@
 
 import sys
 from MCTS import *
-from PartialSolution import *
+from SolutionHandler import *
 #from sympy import sympify, symbols
 #from sympy.parsing.sympy_parser import parse_expr
 
 def main(args):
-    my_objective = PartialExpression([expansions[0]])
-    mcts = MCTS(my_objective)
-    mcts.run()
+    my_objective = [expansions[4], expansions[0], expansions[1]]
+    handlerObject = ExpressionHandler()
+    handlerObject.objective = my_objective
+    mcts = MCTS(handlerObject)
+    #mcts.run()
 
 if __name__ == '__main__':
     main(sys.argv[1:])

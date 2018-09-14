@@ -1,12 +1,14 @@
-from PartialSolution import PartialSolution
+from SolutionHandler import SolutionHandler
+import random
 
 class SearchNode(object):
 
-    def __init__(self, parent=None, part_sol=PartialSolution()):
+    def __init__(self, handler=SolutionHandler(), parent=None):
+        random.seed(0)
+        self.value = []
         self.parent = parent
-        self.value = part_sol
-        self.objective = None if parent == None else parent.objective
-        
+        self.handler = handler    
+ 
     def iteration(self):
         node = self.treePolicy()
         part_sol = node.rollOut()
@@ -22,7 +24,7 @@ class SearchNode(object):
         return SearhNode()
 
     def rollOut(self):
-        return PartialSolution()
+        return SolutionHandler()
 
     def backup(self, reward):
         return 
