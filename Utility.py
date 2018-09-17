@@ -9,6 +9,10 @@ def normalize(x, min_value, max_value):
     else:
         return x
 
+def print_log(text, shouldPrint):
+    if shouldPrint:
+        print(text)
+
 # LAZY WORKAROUND!! Fix this later!
 def instantiateNewObject(obj):
     new_instance = deepcopy(obj)
