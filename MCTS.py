@@ -9,7 +9,7 @@ class MCTS(object):
         self.iterations = iterations
         self.root = SearchNode(handler)
       
-        for i in range(15): 
+        for i in range(5000): 
             self.root.iteration()
  
     def run(self):
