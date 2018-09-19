@@ -144,21 +144,27 @@ class SearchNode(object):
             node = node.parent
 
     def bestChild(self):
+        print("Searching best child...")
         if self.handler.solution != None:
+            print("Found best solution!")
             return self.handler.solution
-        valueHolder = []
+        valueHolder = copy.deepcopy(self.value)
         current_node = self
         while len(current_node.children.keys()) != 0:
-            
-            for values in current_node.value:
-                valueHolder.append(value)
-
-            most_visits = 0
+            print("Checking node depth "+str(current_node.depth))
+            most_visits = -1
             for key in current_node.children.keys():
+                print("Checking key "+str(key))
+                print("visits: "+str(current_node.children[key].visits)+", reward: "+str(current_node.children[key].reward))
                 if current_node.children[key] == None:
                     continue
                 if current_node.children[key].visits > most_visits:
                     best_child = current_node.children[key]
                     most_visits = current_node.children[key].visits
+            print("Selected node: ")
+            self.handler.printValue(best_child.value)
             current_node = best_child
+            for value in current_node.value:
+                valueHolder.append(value)
+
         return valueHolder

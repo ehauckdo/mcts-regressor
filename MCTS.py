@@ -9,11 +9,16 @@ class MCTS(object):
         self.iterations = iterations
         self.root = SearchNode(handler)
       
-        for i in range(100): 
+        for i in range(10000): 
             self.root.iteration()
         result = self.root.bestChild()
         print("Best: ")
-        handler.printValue(result) 
+        if len(handler.solution) > 0:
+            for sol in handler.solution:
+                print("Solution option: ")
+                handler.printValue(sol) 
+        else:
+            handler.printValue(result) 
 
     def run(self):
         for i in range(self.iterations):
