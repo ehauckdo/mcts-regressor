@@ -9,6 +9,7 @@ from SolutionHandler import *
 def main(args):
     my_objective = [expansions[4], expansions[0], expansions[1]]
     handlerObject = ExpressionHandler()
+    handlerObject.expansion_limit = 5
     handlerObject.objective = my_objective
     mcts = MCTS(handlerObject)
     #mcts.run()
