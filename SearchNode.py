@@ -22,16 +22,6 @@ class SearchNode(object):
         self.bounds = [sys.maxint, -sys.maxint]
         self.fullyExpanded = False
         self.initChildren()        
-
-        #print_log("Handler objective: ",logging)
-        #self.handler.printValue(handler.objective)
-
-        #for i in range(20): 
-        #    self.handler.expandSolution(self.value)
-        #    print_log("len: "+str(len(self.value))+", value: ",logging)
-        #    self.handler.printValue(self.value)
-        #    print_log("Moves lef1t:"+str(self.handler.getNumberExpansionsPossible(self.value)),logging)
-        #    print_log("",logging) 
        
     def initChildren(self):
         self.children = {}  
@@ -153,3 +143,22 @@ class SearchNode(object):
             print_log("Updated bounds in node: "+str(node.bounds[0])+", "+str(node.bounds[1]), logging)
             node = node.parent
 
+    def bestChild(self):
+        if self.handler.solution != None:
+            return self.handler.solution
+        valueHolder = []
+        current_node = self
+        while len(current_node.children.keys()) != 0:
+            
+            for values in current_node.value:
+                valueHolder.append(value)
+
+            most_visits = 0
+            for key in current_node.children.keys():
+                if current_node.children[key] == None:
+                    continue
+                if current_node.children[key].visits > most_visits:
+                    best_child = current_node.children[key]
+                    most_visits = current_node.children[key].visits
+            current_node = best_child
+        return valueHolder
