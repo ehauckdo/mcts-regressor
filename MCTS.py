@@ -3,20 +3,20 @@ from SolutionHandler import SolutionHandler
 
 class MCTS(object):
 
-    def __init__(self, handler=SolutionHandler(), iterations=1500):
+    def __init__(self, handler=SolutionHandler(), iterations=5000):
         self.iterations = iterations
         self.root = SearchNode(handler)
       
         for i in range(iterations): 
             self.root.iteration()
-        result = self.root.bestChild()
+        result = self.root.bestBranch()
         print("Best: ")
-        if len(handler.solution) > 0:
-            for sol in handler.solution:
+        if len(handler.zeroErrorSolution) > 0:
+            for sol in handler.zeroErrorSolution:
                 print("Solution option: ")
-                handler.printValue(sol) 
+                handler.printComponents(sol) 
         else:
-            handler.printValue(result) 
+            handler.printComponents(result) 
 
     def run(self):
         for i in range(self.iterations):

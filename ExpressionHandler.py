@@ -8,61 +8,52 @@ class ExpressionHandler(SolutionHandler):
 
     def __init__(self):
         self.objective = None
-        self.valueHolder = []
-        self.expansion_limit = 0
-        self.solution = []
+        self.partialSolution = []
+        self.maxSolutionSize = 0
+        self.zeroErrorSolution = []
 
-    def addComponent(self, component):
-        self.value.append(component)
+    def getNumberTerminalsAllowed(self, partialSolution=None):
+        partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        terminalsAllowed = 1
+        for component in partialSolution:
+            terminalsAllowed -= 1
+            terminalsAllowed += component.arity
+        return terminalsAllowed
 
-    def getNumberExpansionsPossible(self, value=None):
-        value = value if value != None else self.valueHolder
-        movesLeft = 1
-        for component in value:
-            movesLeft -= 1
-            movesLeft += component.arity
-        return movesLeft
+    def expandSolution(self, partialSolution=None):
+        partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        terminals_possible = self.getNumberTerminalsAllowed(partialSolution)
+        maxSolutionSize = self.maxSolutionSize
+        currentSize = len(partialSolution)
 
-    def expandSolution(self, value=None):
-        value = value if value != None else self.valueHolder
-        # getNumberExpansionsPossible can have a better naming...
-        expansions_possible = self.getNumberExpansionsPossible(value)
-        expansion_limit = self.expansion_limit
-        current_depth = len(value)
-
-        if expansions_possible == 0 or current_depth >= expansion_limit:
+        if terminals_possible == 0 or currentSize >= maxSolutionSize:
             return False
 
-        arity_allowed = expansion_limit - (expansions_possible + current_depth)
+        arity_allowed = maxSolutionSize - (terminals_possible + currentSize)
 
-        expansions_possible = self.getComponentsWithArityLessEqualThan(arity_allowed)
-        value.append(random.choice(expansions_possible))
+        terminals_possible = self.getComponentsWithArityLessEqualThan(arity_allowed)
+        partialSolution.append(random.choice(terminals_possible))
         return True
 
-    def getComponentsWithArityLessEqualThan(self, arity):
-        comps = []
-        for c in components:
-            if c.arity <= arity: comps.append(c)
-        return comps
-    
-    def getChildren(self, valueHolder):
-        expansions_possible = self.getNumberExpansionsPossible(valueHolder)
-        expansion_limit = self.expansion_limit
-        current_depth = len(valueHolder)
+    def getPossibleChildren(self, partialSolution):
+        terminalsAllowed = self.getNumberTerminalsAllowed(partialSolution)
+        sizeLimit = self.maxSolutionSize
+        currentSize = len(partialSolution)
 
-        if expansions_possible == 0 or current_depth >= expansion_limit:
+        if terminalsAllowed == 0 or currentSize >= sizeLimit:
             return []
 
-        arity_allowed = expansion_limit - (expansions_possible + current_depth)
-        expansions_possible = self.getComponentsWithArityLessEqualThan(arity_allowed)
-        return expansions_possible
+        arityAllowed = sizeLimit - (terminalsAllowed + currentSize)
+        possibleChildren = self.getComponentsWithArityLessEqualThan(arityAllowed)
+        return possibleChildren
 
-    def getReward(self, valueHolder):
-        rootNode = ExpressionNode(valueHolder[0])
-        print("Created root Node: "+str(valueHolder[0].value))
-        for i in range(len(valueHolder)-1):
-            print("Adding child: "+str(valueHolder[i+1].value))
-            rootNode.addChild(valueHolder[i+1])
+    def getReward(self, partialSolution):
+        print("-- Begin REWARD calculation --")
+        rootNode = ExpressionNode(partialSolution[0])
+        print("Created root Node: "+str(partialSolution[0].value))
+        for i in range(len(partialSolution)-1):
+            print("Adding child: "+str(partialSolution[i+1].value))
+            rootNode.addChild(partialSolution[i+1])
 
         objectiveRootNode = ExpressionNode(self.objective[0])
         for i in range(len(self.objective)-1):
@@ -81,29 +72,38 @@ class ExpressionHandler(SolutionHandler):
             y_pred.append(rootNode.execute({"x":test_value}))
             y_true.append(objectiveRootNode.execute({'x':test_value}))
             test_value += 0.5
-        print("y_pred: ")
-        print(y_pred)
-        print("y_true: ")
-        print(y_true)
+        #print("y_pred: ")
+        #print(y_pred)
+        #print("y_true: ")
+        #print(y_true)
         mse = mean_squared_error(y_true, y_pred)
         if mse == 0:
             print("Found 0 error solution!: ")
-            self.printValue(valueHolder)
-            self.solution.append(valueHolder)
+            self.printComponents(partialSolution)
+            self.zeroErrorSolution.append(partialSolution)
         mse = -mse
 
         print("Objective result: "+str(objectiveRootNode.execute({"x":5})))
         result = rootNode.execute({"x":5})
         print("Result: "+str(result))
+        print("-- Finished REWARD calculation --")
 
         return mse
         #return result
 
-    def printValue(self, value=None):
-        value = value if value != None else self.valueHolder
-        for i in range(len(value)):
-            print("["+str(i)+"]: ", value[i].value, value[i].arity)
-
+    def getComponentsWithArityLessEqualThan(self, arity):
+        comps = []
+        for c in components:
+            if c.arity <= arity: comps.append(c)
+        return comps
+    
+    def printComponents(self, partialSolution=None):
+        partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        for i in range(len(partialSolution)):
+            print("["+str(i)+"]: ", partialSolution[i].value, partialSolution[i].arity)
+        else:
+            print("*empty*")
+    
     def clear(self):
         self.value = {}
 

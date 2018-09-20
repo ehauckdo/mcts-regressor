@@ -8,7 +8,7 @@ from ExpressionHandler import ExpressionHandler
 def main(args):
     my_objective = [components[4], components[0], components[1]]
     handlerObject = ExpressionHandler()
-    handlerObject.expansion_limit = 5
+    handlerObject.maxSolutionSize = 5
     handlerObject.objective = my_objective
     mcts = MCTS(handlerObject)
     #mcts.run()
