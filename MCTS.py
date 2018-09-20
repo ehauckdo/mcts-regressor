@@ -1,7 +1,5 @@
 from SearchNode import SearchNode
-from ExpressionHandler import *
-from Utility import *
-import importlib
+from SolutionHandler import SolutionHandler
 
 class MCTS(object):
 
@@ -9,7 +7,7 @@ class MCTS(object):
         self.iterations = iterations
         self.root = SearchNode(handler)
       
-        for i in range(10000): 
+        for i in range(iterations): 
             self.root.iteration()
         result = self.root.bestChild()
         print("Best: ")

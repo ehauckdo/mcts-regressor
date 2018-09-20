@@ -1,4 +1,8 @@
-from SolutionHandler import *
+import random
+from sklearn.metrics import mean_squared_error
+from SolutionHandler import SolutionHandler
+from ExpressionNode import ExpressionNode
+from ExpressionComponents import components 
 
 class ExpressionHandler(SolutionHandler):
 

@@ -1,4 +1,3 @@
-from ExpressionComponents import *
 
 class ExpressionNode(object):
 
