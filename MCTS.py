@@ -1,5 +1,5 @@
 from SearchNode import SearchNode
-from SolutionHandler import *
+from ExpressionHandler import *
 from Utility import *
 import importlib
 
