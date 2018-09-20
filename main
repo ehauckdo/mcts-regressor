@@ -3,11 +3,10 @@
 import sys
 from MCTS import *
 from SolutionHandler import *
-#from sympy import sympify, symbols
-#from sympy.parsing.sympy_parser import parse_expr
+from ExpressionComponents import *
 
 def main(args):
-    my_objective = [expansions[4], expansions[0], expansions[1]]
+    my_objective = [components[4], components[0], components[1]]
     handlerObject = ExpressionHandler()
     handlerObject.expansion_limit = 5
     handlerObject.objective = my_objective
