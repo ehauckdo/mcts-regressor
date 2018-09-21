@@ -1,4 +1,5 @@
 import random
+import logging
 from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
@@ -48,11 +49,11 @@ class ExpressionHandler(SolutionHandler):
         return possibleChildren
 
     def getReward(self, partialSolution):
-        print("-- Begin REWARD calculation --")
+        logging.debug("Building expression tree...")
         rootNode = ExpressionNode(partialSolution[0])
-        print("Created root Node: "+str(partialSolution[0].value))
+        logging.debug("Created expression Root Node: "+str(partialSolution[0].value))
         for i in range(len(partialSolution)-1):
-            print("Adding child: "+str(partialSolution[i+1].value))
+            logging.debug("Adding child: "+str(partialSolution[i+1].value))
             rootNode.addChild(partialSolution[i+1])
 
         objectiveRootNode = ExpressionNode(self.objective[0])
@@ -62,7 +63,7 @@ class ExpressionHandler(SolutionHandler):
         y_pred = []
         y_true = []
 
-        print("calculating reward")
+        logging.debug("Executing tree...")
         test_value = -10
         while test_value <= 10:
             #value = rootNode.execute({"x":test_value})
@@ -78,18 +79,14 @@ class ExpressionHandler(SolutionHandler):
         #print(y_true)
         mse = mean_squared_error(y_true, y_pred)
         if mse == 0:
-            print("Found 0 error solution!: ")
-            self.printComponents(partialSolution)
+            logging.info("Found 0 error solution!: "+self.printComponents(partialSolution))
             self.zeroErrorSolution.append(partialSolution)
         mse = -mse
 
-        print("Objective result: "+str(objectiveRootNode.execute({"x":5})))
-        result = rootNode.execute({"x":5})
-        print("Result: "+str(result))
-        print("-- Finished REWARD calculation --")
+        logging.debug("Expression Result for x= 5: "+str(rootNode.execute({"x":5})))
+        logging.debug("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
         return mse
-        #return result
 
     def getComponentsWithArityLessEqualThan(self, arity):
         comps = []
@@ -99,11 +96,14 @@ class ExpressionHandler(SolutionHandler):
     
     def printComponents(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        string = ""
         for i in range(len(partialSolution)):
-            print("["+str(i)+"]: ", partialSolution[i].value, partialSolution[i].arity)
-        else:
-            print("*empty*")
-    
+            string += "\n["+str(i)+"]: val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity)
+            continue
+            #return("["+str(i)+"]: val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
+        if len(partialSolution) == 0:  
+            return("*empty*")
+        return string
     def clear(self):
         self.value = {}
 

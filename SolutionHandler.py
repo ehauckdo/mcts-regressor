@@ -5,9 +5,6 @@ class SolutionHandler(object):
         self.partialSolution = [] 
         self.maxSolutionSize = 0
 
-    def addComponent(self, component):
-        self.value.append(component)
-
     def expandSolution(self):
         return
 
