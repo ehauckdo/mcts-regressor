@@ -41,7 +41,7 @@ class SearchNode(object):
         logging.debug(self.handler.printComponents(possible_children))
 
     def iteration(self):
-        logging.info("==== New Iteration ====")
+        logging.info("======== New Iteration =========")
         self.handler.partialSolution = copy.deepcopy(self.components)
         node = self.treePolicy()
         reward = node.rollOut()
@@ -54,7 +54,7 @@ class SearchNode(object):
         while selectedNode.depth < self.depth_limit:
             if selectedNode.fullyExpanded is False:
                 logging.info("Expanding node:"+self.handler.printComponents(selectedNode.components))
-                logging.info("Uninitialized Children: "+str(len(selectedNode.getUninitializedChildren())))
+                logging.info("Number of uninitialized children: "+str(len(selectedNode.getUninitializedChildren())))
                 expandedNode = selectedNode.expand()
                 if len(selectedNode.getUninitializedChildren()) == 0:
                     logging.info("This node is now fully expanded.")
@@ -88,8 +88,6 @@ class SearchNode(object):
             logging.debug("Bounds: "+str(self.bounds[0])+", "+str(self.bounds[1]))
             logging.debug("UCT value: "+str(uct_value))
 
-            uct_value = uct_value # apply some noise here to break ties
-
             if uct_value > best_value:
                 selected_node = child_node
                 selected_node_value = key
@@ -122,6 +120,7 @@ class SearchNode(object):
         while current_depth < self.depth_limit and self.handler.expandSolution(componentHolder) == True:
             current_depth += 1 
 
+        logging.info("Rollouted expression: "+self.handler.printComponents(componentHolder))
         reward = self.handler.getReward(componentHolder)
         logging.info("Rollout completed. Reward: "+str(reward))
 
@@ -137,7 +136,7 @@ class SearchNode(object):
                 node.bounds[1] = reward
             node.visits += 1
             node.reward += reward
-            logging.info("Updated bounds in node depth "+str(node.depth)+": "+str(node.bounds[0])+", "+str(node.bounds[1]))
+            logging.debug("Updated bounds in node depth "+str(node.depth)+": "+str(node.bounds[0])+", "+str(node.bounds[1]))
             node = node.parent
 
     def bestChild(self):

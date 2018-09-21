@@ -4,19 +4,17 @@ class SolutionHandler(object):
         self.objective = None
         self.partialSolution = [] 
         self.maxSolutionSize = 0
-
-    def expandSolution(self):
-        return
-
-    def getReward(self, valueHolder):
+    
+    def getPossibleChildren(self, partialSolution):
         return 0
 
-    def getPossibleChildren(self, valueHolder):
+    def expandSolution(self, partialSolution=None):
+        return
+
+    def getReward(self, partialSolution):
         return 0
 
     def printComponents(self, partialSolution):
         for components in partialSolution:
             print(components)
 
-    def clear(self):
-        self.value = {}

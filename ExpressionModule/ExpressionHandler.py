@@ -7,20 +7,36 @@ from ExpressionModule.ExpressionComponents import components
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self):
-        self.objective = None
+    def __init__(self, objective=None):
+        self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 0
         self.zeroErrorSolution = []
+        self.executeObjectiveTree() 
 
-    def getNumberTerminalsAllowed(self, partialSolution=None):
-        partialSolution = partialSolution if partialSolution != None else self.partialSolution
-        terminalsAllowed = 1
-        for component in partialSolution:
-            terminalsAllowed -= 1
-            terminalsAllowed += component.arity
-        return terminalsAllowed
+    def executeObjectiveTree(self):
+        objectiveRootNode = ExpressionNode(self.objective[0])
+        for i in range(len(self.objective)-1):
+            objectiveRootNode.addChild(self.objective[i+1])
+        test_value = -10
+        self.y_true = []
+        while test_value <= 10:
+            objectiveResult = objectiveRootNode.execute({'x':test_value})
+            self.y_true.append(objectiveResult)
+            test_value += 0.5
+        
 
+    def getPossibleChildren(self, partialSolution):
+        terminalsAllowed = self.getNumberTerminalsAllowed(partialSolution)
+        sizeLimit = self.maxSolutionSize
+        currentSize = len(partialSolution)
+
+        if terminalsAllowed == 0 or currentSize >= sizeLimit:
+            return []
+
+        arityAllowed = sizeLimit - (terminalsAllowed + currentSize)
+        possibleChildren = self.getComponentsWithArityLessEqualThan(arityAllowed)
+        return possibleChildren
     def expandSolution(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
         terminals_possible = self.getNumberTerminalsAllowed(partialSolution)
@@ -36,17 +52,6 @@ class ExpressionHandler(SolutionHandler):
         partialSolution.append(random.choice(terminals_possible))
         return True
 
-    def getPossibleChildren(self, partialSolution):
-        terminalsAllowed = self.getNumberTerminalsAllowed(partialSolution)
-        sizeLimit = self.maxSolutionSize
-        currentSize = len(partialSolution)
-
-        if terminalsAllowed == 0 or currentSize >= sizeLimit:
-            return []
-
-        arityAllowed = sizeLimit - (terminalsAllowed + currentSize)
-        possibleChildren = self.getComponentsWithArityLessEqualThan(arityAllowed)
-        return possibleChildren
 
     def getReward(self, partialSolution):
         logging.debug("Building expression tree...")
@@ -61,32 +66,35 @@ class ExpressionHandler(SolutionHandler):
             objectiveRootNode.addChild(self.objective[i+1])
 
         y_pred = []
-        y_true = []
 
         logging.debug("Executing tree...")
         test_value = -10
         while test_value <= 10:
-            #value = rootNode.execute({"x":test_value})
-            #obj_value = objectiveRootNode.execute({'x':test_value})
-            #print("Test_value: "+str(test_value))
-            #print(str(value)+" --- "+str(obj_value))
-            y_pred.append(rootNode.execute({"x":test_value}))
-            y_true.append(objectiveRootNode.execute({'x':test_value}))
+            expressionResult = rootNode.execute({"x":test_value})
+            y_pred.append(expressionResult)
             test_value += 0.5
-        #print("y_pred: ")
-        #print(y_pred)
-        #print("y_true: ")
-        #print(y_true)
-        mse = mean_squared_error(y_true, y_pred)
+        #logging.debug("y_pred: ")
+        #logging.debug(y_pred)
+        #logging.debug("y_true: ")
+        #logging.debug(y_true)
+        mse = mean_squared_error(self.y_true, y_pred)
         if mse == 0:
-            logging.info("Found 0 error solution!: "+self.printComponents(partialSolution))
+            logging.info("0 error solution found!")
             self.zeroErrorSolution.append(partialSolution)
         mse = -mse
 
-        logging.debug("Expression Result for x= 5: "+str(rootNode.execute({"x":5})))
-        logging.debug("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
+        logging.info("Expression Result for x= 5: "+str(rootNode.execute({"x":5})))
+        logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
         return mse
+
+    def getNumberTerminalsAllowed(self, partialSolution=None):
+        partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        terminalsAllowed = 1
+        for component in partialSolution:
+            terminalsAllowed -= 1
+            terminalsAllowed += component.arity
+        return terminalsAllowed
 
     def getComponentsWithArityLessEqualThan(self, arity):
         comps = []
@@ -96,14 +104,11 @@ class ExpressionHandler(SolutionHandler):
     
     def printComponents(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
-        string = ""
-        for i in range(len(partialSolution)):
-            string += "\n["+str(i)+"]: val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity)
-            continue
-            #return("["+str(i)+"]: val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
         if len(partialSolution) == 0:  
             return("*empty*")
+        
+        string = ""
+        for i in range(len(partialSolution)):
+            string += "\n val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity)
         return string
-    def clear(self):
-        self.value = {}
 
