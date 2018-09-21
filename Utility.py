@@ -13,12 +13,6 @@ def print_log(text, shouldPrint):
     if shouldPrint:
         print(text)
 
-# LAZY WORKAROUND!! Fix this later!
-def instantiateNewObject(obj):
-    new_instance = deepcopy(obj)
-    new_instance.value = {}
-    return new_instance
-
 def instantiateNewObject(obj):
     import importlib
     module_name = obj.__module__
