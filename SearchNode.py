@@ -2,7 +2,7 @@ import copy
 import sys
 import random
 import math
-from Utility import print_log, normalize
+from Utility.Utility import print_log, normalize
 from SolutionHandler import SolutionHandler
 
 logging = True
