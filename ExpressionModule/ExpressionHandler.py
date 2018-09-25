@@ -1,6 +1,8 @@
 import random
 import logging
 import sys
+import numpy as np
+from collections import namedtuple
 from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
@@ -15,8 +17,7 @@ class ExpressionHandler(SolutionHandler):
         self.executeObjectiveTree() 
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
-        self.bestSolutionSoFar = (None, -sys.maxint)
-        self.iterationCount = 0
+        self.initializeStatistics()
 
     def executeObjectiveTree(self):
         objectiveRootNode = ExpressionNode(self.objective[0])
@@ -28,6 +29,12 @@ class ExpressionHandler(SolutionHandler):
             objectiveResult = objectiveRootNode.execute({'x':test_value})
             self.y_true.append(objectiveResult)
             test_value += 0.5
+
+    def initializeStatistics(self):
+        self.statistics = {}
+        self.statistics["bestSolution"] = None
+        self.statistics["bestError"] = -sys.maxint
+        self.statistics["iterations"] = 0
 
     def getPossibleChildren(self, partialSolution):
         terminalsAllowed = self.getNumberTerminalsAllowed(partialSolution)
@@ -79,10 +86,6 @@ class ExpressionHandler(SolutionHandler):
         #    test_value += 0.5
 
         y_pred = self.buildAndExecuteTree(partialSolution)
-        #logging.debug("y_pred: ")
-        #logging.debug(y_pred)
-        #logging.debug("y_true: ")
-        #logging.debug(y_true)
         mse = mean_squared_error(self.y_true, y_pred)
         if mse == 0:
             solutionHash = hash(tuple(partialSolution))
@@ -96,10 +99,13 @@ class ExpressionHandler(SolutionHandler):
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
-        if mse > self.bestSolutionSoFar[1]:
-            self.bestSolutionSoFar = (partialSolution, mse)
+        #if mse > self.bestSolutionSoFar[1]:
+        if mse > self.statistics["bestError"] :
+            #self.bestSolutionSoFar = (partialSolution, mse)
+            self.statistics["bestError"] = mse
+            self.statistics["bestSolution"] = partialSolution
 
-        self.logBestResult()
+        self.logExpression(self.statistics["bestSolution"])
         return mse
 
     def buildAndExecuteTree(self, partialSolution):
@@ -146,12 +152,11 @@ class ExpressionHandler(SolutionHandler):
             string.append("val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
         return string
 
-    def logBestResult(self):
-        self.iterationCount +=1
-        if self.iterationCount % 100 == 0:
-            logging.info("Best solution so far (reward:"+str(self.bestSolutionSoFar[1])+"): ")
-            y_pred = self.buildAndExecuteTree(self.bestSolutionSoFar[0])
-            with open('result/result'+str(self.iterationCount/100)+'.csv', 'w') as f:
-                f.write("-10,10,0.5\n")
-                f.write("\n".join([str(y) for y in y_pred]))
+    def logExpression(self, expression):
+        self.statistics["iterations"] +=1
+        if self.statistics["iterations"] % 100 == 0:
+            y_pred = self.buildAndExecuteTree(expression)
+            with open('result/result'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
+                index = -10
+                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(-10, 10, 0.5), y_pred)]))
 
