@@ -1,5 +1,6 @@
 import random
 import logging
+import sys
 from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
@@ -11,9 +12,11 @@ class ExpressionHandler(SolutionHandler):
         self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 0
+        self.executeObjectiveTree() 
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
-        self.executeObjectiveTree() 
+        self.bestSolutionSoFar = (None, -sys.maxint)
+        self.iterationCount = 0
 
     def executeObjectiveTree(self):
         objectiveRootNode = ExpressionNode(self.objective[0])
@@ -55,25 +58,27 @@ class ExpressionHandler(SolutionHandler):
 
 
     def getReward(self, partialSolution):
-        logging.debug("Building expression tree...")
-        rootNode = ExpressionNode(partialSolution[0])
-        logging.debug("Created expression Root Node: "+str(partialSolution[0].value))
-        for i in range(len(partialSolution)-1):
-            logging.debug("Adding child: "+str(partialSolution[i+1].value))
-            rootNode.addChild(partialSolution[i+1])
+        #logging.debug("Building expression tree...")
+        #rootNode = ExpressionNode(partialSolution[0])
+        #logging.debug("Created expression Root Node: "+str(partialSolution[0].value))
+        #for i in range(len(partialSolution)-1):
+        #    logging.debug("Adding child: "+str(partialSolution[i+1].value))
+        #    rootNode.addChild(partialSolution[i+1])
 
-        objectiveRootNode = ExpressionNode(self.objective[0])
-        for i in range(len(self.objective)-1):
-            objectiveRootNode.addChild(self.objective[i+1])
+        #objectiveRootNode = ExpressionNode(self.objective[0])
+        #for i in range(len(self.objective)-1):
+        #    objectiveRootNode.addChild(self.objective[i+1])
 
-        y_pred = []
+        #y_pred = []
 
-        logging.debug("Executing tree...")
-        test_value = -10
-        while test_value <= 10:
-            expressionResult = rootNode.execute({"x":test_value})
-            y_pred.append(expressionResult)
-            test_value += 0.5
+        #logging.debug("Executing tree...")
+        #test_value = -10
+        #while test_value <= 10:
+        #    expressionResult = rootNode.execute({"x":test_value})
+        #    y_pred.append(expressionResult)
+        #    test_value += 0.5
+
+        y_pred = self.buildAndExecuteTree(partialSolution)
         #logging.debug("y_pred: ")
         #logging.debug(y_pred)
         #logging.debug("y_true: ")
@@ -91,7 +96,31 @@ class ExpressionHandler(SolutionHandler):
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
+        if mse > self.bestSolutionSoFar[1]:
+            self.bestSolutionSoFar = (partialSolution, mse)
+
+        self.logBestResult()
         return mse
+
+    def buildAndExecuteTree(self, partialSolution):
+        rootNode = ExpressionNode(partialSolution[0])
+        for i in range(len(partialSolution)-1):
+            logging.debug("Adding child: "+str(partialSolution[i+1].value))
+            rootNode.addChild(partialSolution[i+1])
+        
+        objectiveRootNode = ExpressionNode(self.objective[0])
+        for i in range(len(self.objective)-1):
+            objectiveRootNode.addChild(self.objective[i+1])
+        
+        y_pred = []
+
+        logging.debug("Executing tree...")
+        test_value = -10
+        while test_value <= 10:
+            expressionResult = rootNode.execute({"x":test_value})
+            y_pred.append(expressionResult)
+            test_value += 0.5
+        return y_pred
 
     def getNumberTerminalsAllowed(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
@@ -116,4 +145,13 @@ class ExpressionHandler(SolutionHandler):
         for i in range(len(partialSolution)):
             string.append("val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
         return string
+
+    def logBestResult(self):
+        self.iterationCount +=1
+        if self.iterationCount % 100 == 0:
+            logging.info("Best solution so far (reward:"+str(self.bestSolutionSoFar[1])+"): ")
+            y_pred = self.buildAndExecuteTree(self.bestSolutionSoFar[0])
+            with open('result/result'+str(self.iterationCount/100)+'.csv', 'w') as f:
+                f.write("-10,10,0.5\n")
+                f.write("\n".join([str(y) for y in y_pred]))
 

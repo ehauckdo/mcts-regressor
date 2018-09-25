@@ -1,4 +1,6 @@
 import logging
+import StringIO
+import time
 from SearchNode import SearchNode
 from SolutionHandler import SolutionHandler
 
@@ -14,7 +16,7 @@ class MCTS(object):
     def run(self):
         for i in range(self.iterations):
             self.root.iteration()
-        
+ 
         if len(self.handler.zeroErrorSolution) > 0:
             for sol in self.handler.zeroErrorSolution:
                 print("Solution option: \n"+"\n".join(self.handler.printComponents(sol)))
@@ -22,3 +24,4 @@ class MCTS(object):
             result = self.root.bestBranch()
             print("Best: ")
             print(handler.printComponents(result))
+
