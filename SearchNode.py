@@ -53,7 +53,7 @@ class SearchNode(object):
          
         while selectedNode.depth < self.depth_limit:
             if selectedNode.fullyExpanded is False:
-                logging.info("Expanding node:"+self.handler.printComponents(selectedNode.components))
+                logging.info("Expanding node:"+"\n".join(self.handler.printComponents(selectedNode.components)))
                 logging.info("Number of uninitialized children: "+str(len(selectedNode.getUninitializedChildren())))
                 expandedNode = selectedNode.expand()
                 if len(selectedNode.getUninitializedChildren()) == 0:
@@ -65,7 +65,7 @@ class SearchNode(object):
                 if not selectedNode.children:
                     break  
                 selectedNode = selectedNode.uct()
-        logging.info("Selected node from treePolicy: "+self.handler.printComponents())
+        logging.info("Selected node from treePolicy: "+"\n".join(self.handler.printComponents()))
         return selectedNode
 
     def uct(self):
@@ -97,8 +97,8 @@ class SearchNode(object):
             raise ValueError('No node was selected in UCT')
 
         self.handler.partialSolution.append(selected_node_value)
-        logging.info("Selected node by UCT: "+self.handler.printComponents(selected_node.components))
-        
+        #logging.info("Selected node by UCT: "+self.handler.printComponents(selected_node.components))
+        logging.info("Selected node by UCT: \n"+"\n".join(self.handler.printComponents(selected_node.components)))
         return selected_node
 
     def expand(self):
@@ -109,7 +109,7 @@ class SearchNode(object):
         newChild = SearchNode(self.handler, self, [selectedComponent])
         self.children[selectedComponent] = newChild
         
-        logging.info("Expanded child: "+self.handler.printComponents(newChild.components))
+        logging.info("Expanded child: "+"\n".join(self.handler.printComponents(newChild.components)))
         return newChild
 
     def rollOut(self):
@@ -120,7 +120,7 @@ class SearchNode(object):
         while current_depth < self.depth_limit and self.handler.expandSolution(componentHolder) == True:
             current_depth += 1 
 
-        logging.info("Rollouted expression: "+self.handler.printComponents(componentHolder))
+        logging.info("Rollouted expression: \n"+"\n".join(self.handler.printComponents(componentHolder)))
         reward = self.handler.getReward(componentHolder)
         logging.info("Rollout completed. Reward: "+str(reward))
 

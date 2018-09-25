@@ -12,6 +12,7 @@ class ExpressionHandler(SolutionHandler):
         self.partialSolution = []
         self.maxSolutionSize = 0
         self.zeroErrorSolution = []
+        self.zeroErrorSolutionHashs = []
         self.executeObjectiveTree() 
 
     def executeObjectiveTree(self):
@@ -24,7 +25,6 @@ class ExpressionHandler(SolutionHandler):
             objectiveResult = objectiveRootNode.execute({'x':test_value})
             self.y_true.append(objectiveResult)
             test_value += 0.5
-        
 
     def getPossibleChildren(self, partialSolution):
         terminalsAllowed = self.getNumberTerminalsAllowed(partialSolution)
@@ -37,6 +37,7 @@ class ExpressionHandler(SolutionHandler):
         arityAllowed = sizeLimit - (terminalsAllowed + currentSize)
         possibleChildren = self.getComponentsWithArityLessEqualThan(arityAllowed)
         return possibleChildren
+    
     def expandSolution(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
         terminals_possible = self.getNumberTerminalsAllowed(partialSolution)
@@ -79,12 +80,16 @@ class ExpressionHandler(SolutionHandler):
         #logging.debug(y_true)
         mse = mean_squared_error(self.y_true, y_pred)
         if mse == 0:
-            logging.info("0 error solution found!")
-            self.zeroErrorSolution.append(partialSolution)
-        mse = -mse
+            solutionHash = hash(tuple(partialSolution))
+            logging.info("0 error solution found! Hash: "+str(solutionHash))
+            if solutionHash not in self.zeroErrorSolutionHashs:
+                self.zeroErrorSolution.append(partialSolution)
+                self.zeroErrorSolutionHashs.append(solutionHash)
+        else:
+            mse = -mse
 
-        logging.info("Expression Result for x= 5: "+str(rootNode.execute({"x":5})))
-        logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
+        #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
+        #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
         return mse
 
@@ -105,10 +110,10 @@ class ExpressionHandler(SolutionHandler):
     def printComponents(self, partialSolution=None):
         partialSolution = partialSolution if partialSolution != None else self.partialSolution
         if len(partialSolution) == 0:  
-            return("*empty*")
+            return(["*empty*"])
         
-        string = ""
+        string = []
         for i in range(len(partialSolution)):
-            string += "\n val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity)
+            string.append("val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
         return string
 

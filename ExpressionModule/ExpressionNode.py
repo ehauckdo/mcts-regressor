@@ -25,7 +25,7 @@ class ExpressionNode(object):
             if self.value in variables.keys():
                 return variables[self.value]
             if self.value == "x":
-                return 10
+                logging.error("This should not happen. X found in the tree")
             else:
                 return self.value
 
