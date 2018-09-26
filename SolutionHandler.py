@@ -11,7 +11,7 @@ class SolutionHandler(object):
     def expandSolution(self, partialSolution=None):
         return
 
-    def getReward(self, partialSolution):
+    def getRolloutReward(self, partialSolution):
         return 0
 
     def printComponents(self, partialSolution):

@@ -8,6 +8,7 @@ from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
 from ExpressionModule.ExpressionComponents import components
+from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
@@ -22,24 +23,8 @@ class ExpressionHandler(SolutionHandler):
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
-        self.prepareLogDirectory("logs/")
-        sys.exit()
+        prepareLogDirectory("logs/")
     
-    def prepareLogDirectory(self, folderPath):
-        directory = os.path.dirname(folderPath)
-        # if directory does not exit, create it
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        # if exists, try to clean any old log files inside it
-        else: 
-            for myFile in os.listdir(folderPath):
-                filePath = os.path.join(folder, myFile)
-            try:
-                if os.path.isfile(filePath):
-                    os.unlink(filePath)
-            except Exception as e:
-                pass
-
     def executeObjectiveTree(self):
         objectiveRootNode = ExpressionNode(self.objective[0])
         for i in range(len(self.objective)-1):
@@ -85,29 +70,8 @@ class ExpressionHandler(SolutionHandler):
         return True
 
 
-    def getReward(self, partialSolution):
-        #logging.debug("Building expression tree...")
-        #rootNode = ExpressionNode(partialSolution[0])
-        #logging.debug("Created expression Root Node: "+str(partialSolution[0].value))
-        #for i in range(len(partialSolution)-1):
-        #    logging.debug("Adding child: "+str(partialSolution[i+1].value))
-        #    rootNode.addChild(partialSolution[i+1])
-
-        #objectiveRootNode = ExpressionNode(self.objective[0])
-        #for i in range(len(self.objective)-1):
-        #    objectiveRootNode.addChild(self.objective[i+1])
-
-        #y_pred = []
-
-        #logging.debug("Executing tree...")
-        #test_value = -10
-        #while test_value <= 10:
-        #    expressionResult = rootNode.execute({"x":test_value})
-        #    y_pred.append(expressionResult)
-        #    test_value += 0.5
-
-        y_pred = self.buildAndExecuteTree(partialSolution)
-        mse = mean_squared_error(self.y_true, y_pred)
+    def getRolloutReward(self, partialSolution):
+        mse = self.getMSE(partialSolution)
         if mse == 0:
             solutionHash = hash(tuple(partialSolution))
             logging.info("0 error solution found! Hash: "+str(solutionHash))
@@ -120,13 +84,16 @@ class ExpressionHandler(SolutionHandler):
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
-        #if mse > self.bestSolutionSoFar[1]:
         if mse > self.statistics["bestError"] :
-            #self.bestSolutionSoFar = (partialSolution, mse)
             self.statistics["bestError"] = mse
             self.statistics["bestSolution"] = partialSolution
 
         self.logExpression(self.statistics["bestSolution"])
+        return mse
+
+    def getMSE(self, partialSolution):
+        y_pred = self.buildAndExecuteTree(partialSolution)
+        mse = mean_squared_error(self.y_true, y_pred)
         return mse
 
     def buildAndExecuteTree(self, partialSolution):

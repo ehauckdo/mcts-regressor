@@ -3,7 +3,7 @@ import sys
 import random
 import math
 import logging
-from Utility.Utility import print_log, normalize
+from Utility.Utility import normalize
 from SolutionHandler import SolutionHandler
 
 printlog = True
@@ -121,7 +121,7 @@ class SearchNode(object):
             current_depth += 1 
 
         logging.info("Rollouted expression: \n"+"\n".join(self.handler.printComponents(componentHolder)))
-        reward = self.handler.getReward(componentHolder)
+        reward = self.handler.getRolloutReward(componentHolder)
         logging.info("Rollout completed. Reward: "+str(reward))
 
         return reward
