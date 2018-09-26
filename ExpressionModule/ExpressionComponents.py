@@ -20,18 +20,14 @@ def safediv(x, y):
     return x/y
 
 
-components = [ExpressionComponent(1, 0),
-                ExpressionComponent(2, 0),
-                ExpressionComponent(0, 0),
-                ExpressionComponent("x", 0),
-                ExpressionComponent(np.add, 2),
-                ExpressionComponent(np.subtract, 2),
-                ExpressionComponent(np.multiply, 2),
-                ExpressionComponent(safediv, 2),
-                ExpressionComponent(np.sin, 1)
-                #ExpressionComponent(__add__, 2),
-                #ExpressionComponent(__sub__,2),
-                #ExpressionComponent(__mul__, 2),
-                #ExpressionComponent(math.pow, 2),
-                ]
+components = {  "0" : ExpressionComponent(0, 0),
+                "1" : ExpressionComponent(1, 0),
+                "2" : ExpressionComponent(2, 0),
+                "x" :ExpressionComponent("x", 0),
+                "add": ExpressionComponent(np.add, 2),
+                "sub": ExpressionComponent(np.subtract, 2),
+                "mul": ExpressionComponent(np.multiply, 2),
+                "div": ExpressionComponent(safediv, 2),
+                "sin": ExpressionComponent(np.sin, 1)
+                }
 

@@ -138,7 +138,7 @@ class ExpressionHandler(SolutionHandler):
 
     def getComponentsWithArityLessEqualThan(self, arity):
         comps = []
-        for c in components:
+        for name, c in components.iteritems():
             if c.arity <= arity: comps.append(c)
         return comps
     
@@ -155,8 +155,16 @@ class ExpressionHandler(SolutionHandler):
     def logExpression(self, expression):
         self.statistics["iterations"] +=1
         if self.statistics["iterations"] % 100 == 0:
+            self.logSearch()
             y_pred = self.buildAndExecuteTree(expression)
             with open('result/result'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
                 index = -10
                 f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(-10, 10, 0.5), y_pred)]))
 
+    def logSearch(self):
+        stats = self.statistics
+        with open("search", "a") as myfile:
+            myfile.write(", ".join([str(stats["iterations"]), str(stats["bestError"])]))
+            myfile.write("\n")
+
+    
