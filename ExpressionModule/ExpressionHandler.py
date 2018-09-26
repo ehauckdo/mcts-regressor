@@ -1,6 +1,7 @@
 import random
 import logging
 import sys
+import os, shutil
 import numpy as np
 from collections import namedtuple
 from sklearn.metrics import mean_squared_error
@@ -21,6 +22,23 @@ class ExpressionHandler(SolutionHandler):
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
+        self.prepareLogDirectory("logs/")
+        sys.exit()
+    
+    def prepareLogDirectory(self, folderPath):
+        directory = os.path.dirname(folderPath)
+        # if directory does not exit, create it
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        # if exists, try to clean any old log files inside it
+        else: 
+            for myFile in os.listdir(folderPath):
+                filePath = os.path.join(folder, myFile)
+            try:
+                if os.path.isfile(filePath):
+                    os.unlink(filePath)
+            except Exception as e:
+                pass
 
     def executeObjectiveTree(self):
         objectiveRootNode = ExpressionNode(self.objective[0])
@@ -160,12 +178,12 @@ class ExpressionHandler(SolutionHandler):
         if self.statistics["iterations"] % 100 == 0:
             self.logSearch()
             y_pred = self.buildAndExecuteTree(expression)
-            with open('result/result'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
+            with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
                 f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(self.lower, self.upper+self.step, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
-        with open("search", "a") as myfile:
+        with open("logs/search", "a") as myfile:
             myfile.write(", ".join([str(stats["iterations"]), str(stats["bestError"])]))
             myfile.write("\n")
 
