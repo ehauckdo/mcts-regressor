@@ -10,10 +10,13 @@ from ExpressionModule.ExpressionComponents import components
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self, objective=None):
+    def __init__(self, objective=None, lower=-10, upper=10, step=0.5):
         self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 0
+        self.lower = lower
+        self.upper = upper
+        self.step = step
         self.executeObjectiveTree() 
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
@@ -23,12 +26,12 @@ class ExpressionHandler(SolutionHandler):
         objectiveRootNode = ExpressionNode(self.objective[0])
         for i in range(len(self.objective)-1):
             objectiveRootNode.addChild(self.objective[i+1])
-        test_value = -10
+        testValue = self.lower
         self.y_true = []
-        while test_value <= 10:
-            objectiveResult = objectiveRootNode.execute({'x':test_value})
+        while testValue <= self.upper:
+            objectiveResult = objectiveRootNode.execute({'x':testValue})
             self.y_true.append(objectiveResult)
-            test_value += 0.5
+            testValue += self.step
 
     def initializeStatistics(self):
         self.statistics = {}
@@ -121,11 +124,11 @@ class ExpressionHandler(SolutionHandler):
         y_pred = []
 
         logging.debug("Executing tree...")
-        test_value = -10
-        while test_value <= 10:
-            expressionResult = rootNode.execute({"x":test_value})
+        testValue = self.lower
+        while testValue <= self.upper:
+            expressionResult = rootNode.execute({"x":testValue})
             y_pred.append(expressionResult)
-            test_value += 0.5
+            testValue += self.step
         return y_pred
 
     def getNumberTerminalsAllowed(self, partialSolution=None):
@@ -158,8 +161,7 @@ class ExpressionHandler(SolutionHandler):
             self.logSearch()
             y_pred = self.buildAndExecuteTree(expression)
             with open('result/result'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
-                index = -10
-                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(-10, 10, 0.5), y_pred)]))
+                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(self.lower, self.upper+self.step, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
