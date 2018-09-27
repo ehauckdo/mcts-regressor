@@ -12,14 +12,14 @@ from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self, objective=None, lower=-10, upper=10, step=0.5):
+    def __init__(self, objective=None, lower=-10, upper=10, step=41):
         self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 0
         self.lower = lower
         self.upper = upper
         self.step = step
-        self.executeObjectiveTree() 
+        self.y_true = self.executeTree(self.buildTree(objective)) 
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
@@ -29,12 +29,7 @@ class ExpressionHandler(SolutionHandler):
         objectiveRootNode = ExpressionNode(self.objective[0])
         for i in range(len(self.objective)-1):
             objectiveRootNode.addChild(self.objective[i+1])
-        testValue = self.lower
-        self.y_true = []
-        while testValue <= self.upper:
-            objectiveResult = objectiveRootNode.execute({'x':testValue})
-            self.y_true.append(objectiveResult)
-            testValue += self.step
+        self.y_true = self.executeTree(objectiveRootNode)
 
     def initializeStatistics(self):
         self.statistics = {}
@@ -92,28 +87,24 @@ class ExpressionHandler(SolutionHandler):
         return mse
 
     def getMSE(self, partialSolution):
-        y_pred = self.buildAndExecuteTree(partialSolution)
+        rootNode = self.buildTree(partialSolution)
+        y_pred = self.executeTree(rootNode)
         mse = mean_squared_error(self.y_true, y_pred)
         return mse
-
-    def buildAndExecuteTree(self, partialSolution):
+    
+    def buildTree(self, partialSolution):
         rootNode = ExpressionNode(partialSolution[0])
         for i in range(len(partialSolution)-1):
             logging.debug("Adding child: "+str(partialSolution[i+1].value))
             rootNode.addChild(partialSolution[i+1])
-        
-        objectiveRootNode = ExpressionNode(self.objective[0])
-        for i in range(len(self.objective)-1):
-            objectiveRootNode.addChild(self.objective[i+1])
-        
-        y_pred = []
+        return rootNode        
 
-        logging.debug("Executing tree...")
-        testValue = self.lower
-        while testValue <= self.upper:
-            expressionResult = rootNode.execute({"x":testValue})
+    def executeTree(self, rootNode):
+        y_pred = []
+        testValues = np.linspace(self.lower, self.upper, self.step)
+        for v in testValues:
+            expressionResult = rootNode.execute({"x":v})
             y_pred.append(expressionResult)
-            testValue += self.step
         return y_pred
 
     def getNumberTerminalsAllowed(self, partialSolution=None):
@@ -144,9 +135,10 @@ class ExpressionHandler(SolutionHandler):
         self.statistics["iterations"] +=1
         if self.statistics["iterations"] % 100 == 0:
             self.logSearch()
-            y_pred = self.buildAndExecuteTree(expression)
+            rootNode = self.buildTree(expression)
+            y_pred = self.executeTree(rootNode)
             with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
-                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.arange(self.lower, self.upper+self.step, self.step), y_pred)]))
+                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(-10.0, 10.0, 41.0), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
