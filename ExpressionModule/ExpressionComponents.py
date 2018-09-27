@@ -1,4 +1,5 @@
 from __future__ import division
+import inspect
 import numpy as np
 import math
 
@@ -19,7 +20,10 @@ def safediv(x, y):
     if y == 0: return 0
     return x/y
 
-
+def safeln(x):
+    if x <= 0: return 0
+    return np.log(x)
+    
 components = {  "0" : ExpressionComponent(0, 0),
                 "1" : ExpressionComponent(1, 0),
                 "2" : ExpressionComponent(2, 0),
@@ -28,6 +32,8 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "sub": ExpressionComponent(np.subtract, 2),
                 "mul": ExpressionComponent(np.multiply, 2),
                 "div": ExpressionComponent(safediv, 2),
-                "sin": ExpressionComponent(np.sin, 1)
+                "cos": ExpressionComponent(np.cos, 1),
+                "sin": ExpressionComponent(np.sin, 1),
+                #"ln": ExpressionComponent(safeln, 1)
                 }
 

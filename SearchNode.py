@@ -161,19 +161,19 @@ class SearchNode(object):
             print("Checking node depth "+str(current_node.depth))
             most_visits = -1
             for key in current_node.children.keys():
-                print("Checking key "+str(key))
-                print("visits: "+str(current_node.children[key].visits)+", reward: "+str(current_node.children[key].reward))
+                logging.info("Checking key "+str(key))
+                logging.info("visits: "+str(current_node.children[key].visits)+", reward: "+str(current_node.children[key].reward))
                 if current_node.children[key] == None:
                     continue
                 if current_node.children[key].visits > most_visits:
                     best_child = current_node.children[key]
                     most_visits = current_node.children[key].visits
-            print("Selected node: ")
-            self.handler.printComponents(best_child.components)
+            logging.info("Selected node: ")
+            logging.info("\n".join(self.handler.printComponents(best_child.components)))
             current_node = best_child
             for c in current_node.components:
                 componentHolder.append(c)
-
+        logging.info("Best branch: \n"+"\n".join(self.handler.printComponents(componentHolder)))
         return componentHolder
     
     def getUninitializedChildren(self):

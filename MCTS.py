@@ -22,6 +22,5 @@ class MCTS(object):
                 print("Solution option: \n"+"\n".join(self.handler.printComponents(sol)))
         else:
             result = self.root.bestBranch()
-            print("Best: ")
-            print(handler.printComponents(result))
+            print("Best brach: \n"+"\n".join(self.handler.printComponents(result)))
 
