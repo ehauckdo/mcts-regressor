@@ -19,11 +19,12 @@ def prepareLogDirectory(folderPath):
         else:
             for myFile in os.listdir(folderPath):
                 filePath = os.path.join(folderPath, myFile)
-            try:
-                if os.path.isfile(filePath):
-                    os.unlink(filePath)
-            except Exception as e:
-                pass
+                try:
+                    if os.path.isfile(filePath):
+                        os.remove(filePath)
+                except Exception as e:
+                    print("Error")
+                    pass
 
 # Creates a new instance of dynamic unkown object
 def instantiateNewObject(obj):

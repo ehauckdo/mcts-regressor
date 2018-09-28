@@ -136,7 +136,7 @@ class ExpressionHandler(SolutionHandler):
 
     def logSearch(self):
         stats = self.statistics
-        with open("logs/search", "a") as myfile:
+        with open("logs/search.csv", "a") as myfile:
             myfile.write(", ".join([str(stats["iterations"]), str(stats["bestError"])]))
             myfile.write("\n")
 
