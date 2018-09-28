@@ -24,12 +24,6 @@ class ExpressionHandler(SolutionHandler):
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
         prepareLogDirectory("logs/")
-    
-    def executeObjectiveTree(self):
-        objectiveRootNode = ExpressionNode(self.objective[0])
-        for i in range(len(self.objective)-1):
-            objectiveRootNode.addChild(self.objective[i+1])
-        self.y_true = self.executeTree(objectiveRootNode)
 
     def initializeStatistics(self):
         self.statistics = {}
