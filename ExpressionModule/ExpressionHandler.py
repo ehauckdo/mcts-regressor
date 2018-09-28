@@ -15,7 +15,7 @@ class ExpressionHandler(SolutionHandler):
     def __init__(self, objective=None, lower=-10, upper=10, step=41):
         self.objective = objective
         self.partialSolution = []
-        self.maxSolutionSize = 0
+        self.maxSolutionSize = 5 
         self.lower = lower
         self.upper = upper
         self.step = step
@@ -90,8 +90,9 @@ class ExpressionHandler(SolutionHandler):
         rootNode = ExpressionNode(partialSolution[0])
         for i in range(len(partialSolution)-1):
             logging.debug("Adding child: "+str(partialSolution[i+1].value))
+            print("Adding child: "+str(partialSolution[i+1].value))
             rootNode.addChild(partialSolution[i+1])
-        return rootNode        
+        return rootNode  
 
     def executeTree(self, rootNode):
         y_pred = []

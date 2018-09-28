@@ -1,3 +1,4 @@
+import logging
 
 class ExpressionNode(object):
 
@@ -12,9 +13,9 @@ class ExpressionNode(object):
         node = ExpressionNode(component)
         for i in range(len(self.children)):
             if self.children[i] != None:
-                success = self.children[i].addChild(node)
+                success = self.children[i].addChild(component)
                 if success:
-                    break
+                    return True
             else:
                 self.children[i] = node
                 return True
@@ -34,5 +35,6 @@ class ExpressionNode(object):
 
         if self.arity == 2:
             return self.value(self.children[0].execute(variables), self.children[1].execute(variables))
+        
         return
 
