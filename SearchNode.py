@@ -17,7 +17,7 @@ class SearchNode(object):
         self.handler = handler
         self.visits = 0   
         self.reward = 0
-        self.depth_limit = 5
+        self.depth_limit = 10
         self.C = math.sqrt(2)     
         self.depth = 0 if parent == None else parent.depth + 1    
         self.bounds = [sys.maxint, -sys.maxint]

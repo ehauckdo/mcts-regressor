@@ -90,7 +90,6 @@ class ExpressionHandler(SolutionHandler):
         rootNode = ExpressionNode(partialSolution[0])
         for i in range(len(partialSolution)-1):
             logging.debug("Adding child: "+str(partialSolution[i+1].value))
-            print("Adding child: "+str(partialSolution[i+1].value))
             rootNode.addChild(partialSolution[i+1])
         return rootNode  
 
@@ -128,12 +127,12 @@ class ExpressionHandler(SolutionHandler):
 
     def logExpression(self, expression):
         self.statistics["iterations"] +=1
-        if self.statistics["iterations"] % 100 == 0:
+        if self.statistics["iterations"] % 1000 == 0:
             self.logSearch()
             rootNode = self.buildTree(expression)
             y_pred = self.executeTree(rootNode)
             with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
-                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(-10.0, 10.0, 41.0), y_pred)]))
+                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics

@@ -23,7 +23,16 @@ def safediv(x, y):
 def safeln(x):
     if x <= 0: return 0
     return np.log(x)
-    
+   
+def safepow(x, y):
+    if x < 0 and int(y) != y:
+        x = abs(x)
+    if x == 0 and y < 0:
+       return 0
+    if int(x) == x and int(y) == y and y < 0:
+        y = float(y)
+    return np.power(x, y)
+ 
 components = {  "0" : ExpressionComponent(0, 0),
                 "1" : ExpressionComponent(1, 0),
                 "2" : ExpressionComponent(2, 0),
@@ -33,7 +42,8 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "mul": ExpressionComponent(np.multiply, 2),
                 "div": ExpressionComponent(safediv, 2),
                 "cos": ExpressionComponent(np.cos, 1),
-                "sin": ExpressionComponent(np.sin, 1)
-                #"ln": ExpressionComponent(safeln, 1)
+                "sin": ExpressionComponent(np.sin, 1),
+                "pow": ExpressionComponent(safepow, 2),
+                "ln": ExpressionComponent(safeln, 1)
                 }
 
