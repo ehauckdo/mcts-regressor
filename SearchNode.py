@@ -3,6 +3,7 @@ import sys
 import random
 import math
 import logging
+import numpy as np
 from Utility.Utility import normalize
 from SolutionHandler import SolutionHandler
 
@@ -17,7 +18,7 @@ class SearchNode(object):
         self.handler = handler
         self.visits = 0   
         self.reward = 0
-        self.depth_limit = 10
+        self.depth_limit = 5
         self.C = math.sqrt(2)     
         self.depth = 0 if parent == None else parent.depth + 1    
         self.bounds = [sys.maxint, -sys.maxint]
@@ -51,7 +52,7 @@ class SearchNode(object):
         logging.info("Executing Tree Policy...")
         selectedNode = self
          
-        while selectedNode.depth < self.depth_limit:
+        while selectedNode.children:
             if selectedNode.fullyExpanded is False:
                 logging.info("Expanding node:"+"\n".join(self.handler.printComponents(selectedNode.components)))
                 logging.info("Number of uninitialized children: "+str(len(selectedNode.getUninitializedChildren())))
@@ -62,8 +63,6 @@ class SearchNode(object):
                 selectedNode = expandedNode
                 break
             else:
-                if not selectedNode.children:
-                    break  
                 selectedNode = selectedNode.uct()
         logging.info("Selected node from treePolicy: "+"\n".join(self.handler.printComponents()))
         return selectedNode
@@ -117,11 +116,13 @@ class SearchNode(object):
         current_depth = self.depth
         componentHolder = copy.deepcopy(self.handler.partialSolution)
         
-        while current_depth < self.depth_limit and self.handler.expandSolution(componentHolder) == True:
+        while self.handler.expandSolution(componentHolder) == True:
             current_depth += 1 
 
         logging.info("Rollouted expression: \n"+"\n".join(self.handler.printComponents(componentHolder)))
         reward = self.handler.getRolloutReward(componentHolder)
+        reward = sys.maxint if np.isinf(reward) else reward
+        reward = -sys.maxint if np.isneginf(reward) else reward
         logging.info("Rollout completed. Reward: "+str(reward))
 
         return reward

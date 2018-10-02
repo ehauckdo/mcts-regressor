@@ -83,6 +83,11 @@ class ExpressionHandler(SolutionHandler):
     def getMSE(self, partialSolution):
         rootNode = self.buildTree(partialSolution)
         y_pred = self.executeTree(rootNode)
+        #logging.info(y_pred)
+        #y_pred = np.nan_to_num(y_pred)
+        #y_pred[np.isinf(y_pred)] = sys.maxint
+        #y_pred[np.isneginf(y_pred)] = -sys.maxint
+        #logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
         return mse
     
@@ -132,6 +137,7 @@ class ExpressionHandler(SolutionHandler):
             rootNode = self.buildTree(expression)
             y_pred = self.executeTree(rootNode)
             with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
+                f.write(str(self.statistics["bestError"]))
                 f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
 
     def logSearch(self):

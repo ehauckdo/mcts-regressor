@@ -43,7 +43,7 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "div": ExpressionComponent(safediv, 2),
                 "cos": ExpressionComponent(np.cos, 1),
                 "sin": ExpressionComponent(np.sin, 1),
-                "pow": ExpressionComponent(safepow, 2),
-                "ln": ExpressionComponent(safeln, 1)
+                #"pow": ExpressionComponent(safepow, 2),
+                #"ln": ExpressionComponent(safeln, 1)
                 }
 

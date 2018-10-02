@@ -8,7 +8,7 @@ logging.basicConfig(filename='log',level=logging.INFO, filemode='w')
 
 class MCTS(object):
 
-    def __init__(self, handler=SolutionHandler(), iterations=100000):
+    def __init__(self, handler=SolutionHandler(), iterations=5000):
         self.iterations = iterations
         self.handler = handler
         self.root = SearchNode(handler)
