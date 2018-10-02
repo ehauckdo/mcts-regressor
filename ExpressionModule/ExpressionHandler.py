@@ -137,13 +137,14 @@ class ExpressionHandler(SolutionHandler):
             rootNode = self.buildTree(expression)
             y_pred = self.executeTree(rootNode)
             with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
-                f.write(str(self.statistics["bestError"]))
+                #f.write(str(self.statistics["bestError"]))
+                f.write(str(self.printComponents(expression))+"\n")
                 f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
         with open("logs/search.csv", "a") as myfile:
-            myfile.write(", ".join([str(stats["iterations"]), str(stats["bestError"])]))
+            myfile.write(", ".join([str(stats["iterations"]), "{0:.2f}".format(stats["bestError"])]))
             myfile.write("\n")
 
     
