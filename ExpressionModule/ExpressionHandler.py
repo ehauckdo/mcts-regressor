@@ -66,7 +66,8 @@ class ExpressionHandler(SolutionHandler):
         
         self.statistics["iterations"] +=1
 
-        if mse < self.statistics["bestError"] :
+        if (mse < self.statistics["bestError"] or 
+           (mse == self.statistics["bestError"] and len(partialSolution) < len(self.statistics["bestSolution"]))):
             self.statistics["bestError"] = mse
             self.statistics["bestSolution"] = partialSolution
             self.logSearch()
