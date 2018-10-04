@@ -1,13 +1,10 @@
 #! /usr/bin/env python
 
-# importing the required module 
-import matplotlib.pyplot as plt 
 import csv
 import sys
+import matplotlib.pyplot as plt 
+import numpy as np
 from Utility.Utility import getFilesFromDirectory 
-   
-styles = ['-', '--', '-.', ':',',', 'o', 'v', '^']
-s = 0
 
 def parseExpressionFile(fileName):
     x, fx = [], []
@@ -33,7 +30,6 @@ def fetchObjective(folderPath):
         raise ValueError('Could not find objective.csv file')
     return objective
 
-
 def fetchExpressions(folderPath):
     files = getFilesFromDirectory(folderPath)
     expressions = {}
@@ -44,27 +40,30 @@ def fetchExpressions(folderPath):
             expressions[int(it)] = parseExpressionFile(fileName)
     return expressions
 
-def plotChart(fileName):
-    global s
-    x = []
-    y = []
-    with open(fileName,'r') as csvfile:
-        plots = csv.reader(csvfile, delimiter=' ')
-        expression = " ".join(next(plots))
-        mse = next(plots)[0]
-        for row in plots:
-            x.append(row[0])
-            y.append(row[1])
-    plt.plot(x, y, styles[s])
-    s = 0 if s >= 3 else s + 1
-    fileName = fileName[fileName.find('/')+1:]
-    return fileName+"(MSE:"+mse+"): "+expression
+def plotAll(data):
+    labels = []
+    jet = plt.cm.jet
+    colors = jet(np.linspace(0, 1, len(data)))
+    iterations = sorted(data.keys())   
+
+    for it, color in zip(iterations, colors):
+        expressionInfo = data[it]
+        expression = expressionInfo[0]
+        mse = expressionInfo[1]
+        x = expressionInfo[2]
+        fx = expressionInfo[3]
+        labels.append(str(it)+" - "+expression+" (MSE: "+str(mse)+")")
+        plt.plot(x, fx, color=color)
+    
+    plt.xlabel('Iterations')
+    plt.ylabel('Error')
+    plt.legend(tuple(labels), loc='upper left') 
+    plt.grid(True)
+    plt.show()
 
 def plotTwoByTwo(data, objective):
-    labels = []
-    objectiveLabel = "Objective "+" (MSE: "+str(objective[1])+")"+objective[0]
-    labels.append(objectiveLabel)
-    figureIndex = 521
+    objectiveLabel = "Objective "+objective[0]
+    figureIndex = 321
 
     for iteration, expressionInfo in sorted(data.items()):
         plt.subplot(figureIndex)
@@ -72,8 +71,7 @@ def plotTwoByTwo(data, objective):
         mse = expressionInfo[1]
         x = expressionInfo[2]
         fx = expressionInfo[3]
-        exprLabel = str(iteration)+" (MSE: "+str(mse)+")"+expression
-        labels.append(str(iteration)+" (MSE: "+str(mse)+")"+expression)
+        exprLabel = str(iteration)+": "+expression+" (MSE: "+str(mse)+")"
         plt.xlabel('Iterations')
         plt.ylabel('Error')
         plt.plot(x, fx)
@@ -81,6 +79,9 @@ def plotTwoByTwo(data, objective):
         plt.legend((objectiveLabel, exprLabel), loc='upper left') 
         plt.grid(True)
         figureIndex += 1
+        if figureIndex >= 327:
+            plt.show()
+            figureIndex = 321
         
     plt.show()
 
@@ -96,19 +97,16 @@ def plotSearchStep():
     plt.title("Search Progression")
     plt.show()
 
-
 def main(args):
     expr = fetchExpressions("logs/iterations")
-    for key, value in sorted(expr.items()):
-        print key
-        print value
-    
     objective = fetchObjective("logs/")    
-    print objective
-
+    
     plotSearchStep()
-
+    
     plotTwoByTwo(expr, objective)
+
+    expr["Objective"] = objective
+    plotAll(expr)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
