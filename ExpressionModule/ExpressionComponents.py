@@ -16,15 +16,15 @@ class ExpressionComponent(object):
         return hash(str(self))
 
 
-def safediv(x, y):
+def div(x, y):
     if y == 0: return 0
     return x/y
 
-def safeln(x):
+def ln(x):
     if x <= 0: return 0
     return np.log(x)
    
-def safepow(x, y):
+def pow(x, y):
     if x < 0 and int(y) != y:
         x = abs(x)
     if x == 0 and y < 0:
@@ -40,10 +40,10 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "add": ExpressionComponent(np.add, 2),
                 "sub": ExpressionComponent(np.subtract, 2),
                 "mul": ExpressionComponent(np.multiply, 2),
-                "div": ExpressionComponent(safediv, 2),
+                "div": ExpressionComponent(div, 2),
                 "cos": ExpressionComponent(np.cos, 1),
                 "sin": ExpressionComponent(np.sin, 1),
-                #"pow": ExpressionComponent(safepow, 2),
-                #"ln": ExpressionComponent(safeln, 1)
+                #"pow": ExpressionComponent(pow, 2),
+                #"ln": ExpressionComponent(ln, 1)
                 }
 
