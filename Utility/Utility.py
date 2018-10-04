@@ -26,6 +26,13 @@ def prepareLogDirectory(folderPath):
                     print("Error")
                     pass
 
+def getFilesFromDirectory(folderPath):
+    files = []
+    for myFile in os.listdir(folderPath):
+        filePath = os.path.join(folderPath, myFile)
+        files.append(filePath)
+    return sorted(files)
+
 # Creates a new instance of dynamic unkown object
 def instantiateNewObject(obj):
     import importlib
