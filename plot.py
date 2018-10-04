@@ -40,21 +40,25 @@ def fetchExpressions(folderPath):
             expressions[int(it)] = parseExpressionFile(fileName)
     return expressions
 
-def plotAll(data):
+def plotAll(data, objective, plots=6):
     labels = []
+    iterationKey = sorted(data.keys())
+    selectedKeys = np.linspace(1, len(iterationKey)-3, len(iterationKey)/4, dtype=int)
     jet = plt.cm.jet
-    colors = jet(np.linspace(0, 1, len(data)))
-    iterations = sorted(data.keys())   
+    colors = jet(np.linspace(0, 1, (len(iterationKey)/4)+1))
 
-    for it, color in zip(iterations, colors):
-        expressionInfo = data[it]
+    for key, color in zip(selectedKeys, colors):
+        expressionInfo = data[iterationKey[key]]
         expression = expressionInfo[0]
         mse = expressionInfo[1]
         x = expressionInfo[2]
         fx = expressionInfo[3]
-        labels.append(str(it)+" - "+expression+" (MSE: "+str(mse)+")")
+        labels.append(str(key)+" - "+expression+" (MSE: "+str(mse)+")")
         plt.plot(x, fx, color=color)
     
+    labels.append(objective[0])
+    plt.plot(objective[2],objective[3])
+
     plt.xlabel('Iterations')
     plt.ylabel('Error')
     plt.legend(tuple(labels), loc='upper left') 
@@ -105,8 +109,8 @@ def main(args):
     
     plotTwoByTwo(expr, objective)
 
-    expr["Objective"] = objective
-    plotAll(expr)
+    #expr["Objective"] = objective
+    plotAll(expr, objective)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
