@@ -19,16 +19,18 @@ class ExpressionHandler(SolutionHandler):
         self.lower = lower
         self.upper = upper
         self.step = step
-        self.y_true = self.executeTree(self.buildTree(objective)) 
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
         prepareLogDirectory("logs/")
+        prepareLogDirectory("logs/iterations/")
+        self.y_true = self.executeTree(self.buildTree(objective)) 
+        self.logExpression(objective, "objective.csv")
 
     def initializeStatistics(self):
         self.statistics = {}
         self.statistics["bestSolution"] = None
-        self.statistics["bestError"] = -sys.maxint
+        self.statistics["bestError"] = sys.maxint
         self.statistics["iterations"] = 0
 
     def getPossibleChildren(self, partialSolution):
@@ -61,6 +63,15 @@ class ExpressionHandler(SolutionHandler):
 
     def getRolloutReward(self, partialSolution):
         mse = self.getMSE(partialSolution)
+        
+        self.statistics["iterations"] +=1
+
+        if mse < self.statistics["bestError"] :
+            self.statistics["bestError"] = mse
+            self.statistics["bestSolution"] = partialSolution
+            self.logSearch()
+            self.logExpression(self.statistics["bestSolution"], "iterations/"+str(self.statistics["iterations"])+".csv")
+        
         if mse == 0:
             solutionHash = hash(tuple(partialSolution))
             logging.info("0 error solution found! Hash: "+str(solutionHash))
@@ -73,11 +84,6 @@ class ExpressionHandler(SolutionHandler):
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
 
-        if mse > self.statistics["bestError"] :
-            self.statistics["bestError"] = mse
-            self.statistics["bestSolution"] = partialSolution
-
-        self.logExpression(self.statistics["bestSolution"])
         return mse
 
     def getMSE(self, partialSolution):
@@ -130,21 +136,33 @@ class ExpressionHandler(SolutionHandler):
             string.append("val="+str(partialSolution[i].value)+", ar="+str(partialSolution[i].arity))
         return string
 
-    def logExpression(self, expression):
-        self.statistics["iterations"] +=1
-        if self.statistics["iterations"] % 1000 == 0:
-            self.logSearch()
-            rootNode = self.buildTree(expression)
-            y_pred = self.executeTree(rootNode)
-            with open('logs/iter'+str(self.statistics["iterations"]/100)+'.csv', 'w') as f:
-                #f.write(str(self.statistics["bestError"]))
-                f.write(str(self.printComponents(expression))+"\n")
-                f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
+    def printExpression(self, partialSolution=None):
+        partialSolution = partialSolution if partialSolution != None else self.partialSolution
+        if len(partialSolution) == 0:
+            return(["*empty*"])
+
+        string = []
+        for i in range(len(partialSolution)):
+            try:
+                component = partialSolution[i].value.__name__
+            except:
+                component = str(partialSolution[i].value)
+            string.append(component)
+        return string
+
+    def logExpression(self, expression, fileName="loggedExpression.csv"):
+        rootNode = self.buildTree(expression)
+        y_pred = self.executeTree(rootNode)
+        mse = self.getMSE(expression)
+        with open('logs/'+fileName, 'w') as f:
+            f.write(" ".join(self.printExpression(expression))+"\n")
+            f.write("{0:.2f}".format(mse)+"\n")
+            f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
         with open("logs/search.csv", "a") as myfile:
-            myfile.write(", ".join([str(stats["iterations"]), "{0:.2f}".format(stats["bestError"])]))
+            myfile.write(" ".join([str(stats["iterations"]), "{0:.2f}".format(stats["bestError"])]))
             myfile.write("\n")
 
     
