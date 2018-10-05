@@ -4,7 +4,7 @@ import csv
 import sys
 import matplotlib.pyplot as plt 
 import numpy as np
-from Utility.Utility import getFilesFromDirectory 
+from Utility.Utility import prepareLogDirectory, getFilesFromDirectory 
 
 def parseExpressionFile(fileName):
     x, fx = [], []
@@ -40,12 +40,14 @@ def fetchExpressions(folderPath):
             expressions[int(it)] = parseExpressionFile(fileName)
     return expressions
 
-def plotAll(data, objective, plots=6):
+def plotAll(data, objective, plots=0.5):
     labels = []
     iterationKey = sorted(data.keys())
-    selectedKeys = np.linspace(1, len(iterationKey)-3, len(iterationKey)/4, dtype=int)
+    print(iterationKey)
+    selectedKeys = np.linspace(1, len(iterationKey)-1, len(iterationKey)*plots, dtype=int)
+    print(selectedKeys)
     jet = plt.cm.jet
-    colors = jet(np.linspace(0, 1, (len(iterationKey)/4)+1))
+    colors = jet(np.linspace(0, 1, (len(iterationKey)*plots)+1))
 
     for key, color in zip(selectedKeys, colors):
         expressionInfo = data[iterationKey[key]]
@@ -57,37 +59,45 @@ def plotAll(data, objective, plots=6):
         plt.plot(x, fx, color=color)
     
     labels.append(objective[0])
-    plt.plot(objective[2],objective[3])
+    plt.plot(objective[2],objective[3],'--')
 
     plt.xlabel('Iterations')
     plt.ylabel('Error')
     plt.legend(tuple(labels), loc='upper left') 
     plt.grid(True)
-    plt.show()
+    displayAndSave("All_Functions"+"_".join(objective[0].split()))
 
 def plotTwoByTwo(data, objective):
     objectiveLabel = "Objective "+objective[0]
     figureIndex = 321
+    fileNameIndex = 1
 
     for iteration, expressionInfo in sorted(data.items()):
         plt.subplot(figureIndex)
+        plt.xlabel('Iterations')
+        plt.ylabel('Error')
+        plt.plot(objective[2], objective[3], '--')
         expression = expressionInfo[0]
         mse = expressionInfo[1]
         x = expressionInfo[2]
         fx = expressionInfo[3]
-        exprLabel = str(iteration)+": "+expression+" (MSE: "+str(mse)+")"
-        plt.xlabel('Iterations')
-        plt.ylabel('Error')
         plt.plot(x, fx)
-        plt.plot(objective[2], objective[3])
+        exprLabel = str(iteration)+": "+expression+" (MSE: "+str(mse)+")"
         plt.legend((objectiveLabel, exprLabel), loc='upper left') 
         plt.grid(True)
         figureIndex += 1
         if figureIndex >= 327:
-            plt.show()
+            displayAndSave("Two_by_two_"+str(fileNameIndex))
             figureIndex = 321
-        
-    plt.show()
+            fileNameIndex += 1
+    displayAndSave("Two_by_two_"+str(fileNameIndex))
+
+def displayAndSave(fileName):
+    mng = plt.get_current_fig_manager()
+    mng.resize(*mng.window.maxsize())
+    plt.show(block=False)
+    plt.savefig("figs/"+fileName)
+    plt.close()
 
 def plotSearchStep():
     x, fx = [], []
@@ -98,19 +108,21 @@ def plotSearchStep():
             x.append(row[0])
             fx.append(row[1])
     plt.step(x, fx, where='post')
+    plt.grid(True)
     plt.title("Search Progression")
-    plt.show()
+    displayAndSave("SearchProgress")
 
 def main(args):
+    prepareLogDirectory("figs/")
+
     expr = fetchExpressions("logs/iterations")
     objective = fetchObjective("logs/")    
-    
+   
+    plotAll(expr, objective)
     plotSearchStep()
-    
     plotTwoByTwo(expr, objective)
 
     #expr["Objective"] = objective
-    plotAll(expr, objective)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
