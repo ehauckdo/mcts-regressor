@@ -43,9 +43,7 @@ def fetchExpressions(folderPath):
 def plotAll(data, objective, plots=0.5):
     labels = []
     iterationKey = sorted(data.keys())
-    print(iterationKey)
     selectedKeys = np.linspace(1, len(iterationKey)-1, len(iterationKey)*plots, dtype=int)
-    print(selectedKeys)
     jet = plt.cm.jet
     colors = jet(np.linspace(0, 1, (len(iterationKey)*plots)+1))
 
