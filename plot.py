@@ -88,7 +88,8 @@ def plotTwoByTwo(data, objective):
             displayAndSave("Two_by_two_"+str(fileNameIndex))
             figureIndex = 321
             fileNameIndex += 1
-    displayAndSave("Two_by_two_"+str(fileNameIndex))
+    if figureIndex > 321:
+        displayAndSave("Two_by_two_"+str(fileNameIndex))
 
 def displayAndSave(fileName):
     mng = plt.get_current_fig_manager()
