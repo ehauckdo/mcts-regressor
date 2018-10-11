@@ -79,13 +79,14 @@ class ExpressionHandler(SolutionHandler):
             if solutionHash not in self.zeroErrorSolutionHashs:
                 self.zeroErrorSolution.append(partialSolution)
                 self.zeroErrorSolutionHashs.append(solutionHash)
-        else:
-            mse = -mse
+        #else:
+        #    mse = -mse
 
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
+        reward = 1 /(1+mse)            
 
-        return mse
+        return reward
 
     def getMSE(self, partialSolution):
         rootNode = self.buildTree(partialSolution)
