@@ -63,6 +63,8 @@ class ExpressionHandler(SolutionHandler):
 
     def getRolloutReward(self, partialSolution):
         mse = self.getMSE(partialSolution)
+        mse = sys.maxint if np.isinf(mse) else mse
+        mse = -sys.maxint if np.isneginf(mse) else mse      
         
         self.statistics["iterations"] +=1
 
@@ -91,11 +93,15 @@ class ExpressionHandler(SolutionHandler):
     def getMSE(self, partialSolution):
         rootNode = self.buildTree(partialSolution)
         y_pred = self.executeTree(rootNode)
-        #logging.info(y_pred)
+        logging.info(y_pred)
+        if (np.isnan(y_pred).any()):
+            logging.info("Returning maxint")
+            return sys.maxint
         #y_pred = np.nan_to_num(y_pred)
+        y_pred = np.clip(y_pred, -sys.maxint, sys.maxint)
         #y_pred[np.isinf(y_pred)] = sys.maxint
         #y_pred[np.isneginf(y_pred)] = -sys.maxint
-        #logging.info(y_pred)
+        logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
         return mse
     

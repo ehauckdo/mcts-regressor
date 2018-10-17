@@ -1,4 +1,5 @@
 import logging
+from numpy import nan
 
 class ExpressionNode(object):
 
@@ -22,19 +23,30 @@ class ExpressionNode(object):
         return False
 
     def execute(self, variables={}):
-        if self.arity == 0:
-            if self.value in variables.keys():
-                return variables[self.value]
-            if self.value == "x":
-                logging.error("This should not happen. X found in the tree")
-            else:
-                return self.value
+        returnValue = None
+   
+        try:
+            if self.arity == 0:
+                if self.value in variables.keys():
+                    returnValue = variables[self.value]
+                    #return variables[self.value]
+                elif self.value == "x":
+                    logging.error("This should not happen. X found in the tree")
+                else:
+                    returnValue = self.value
+                    #return self.value
 
-        if self.arity == 1:
-            return self.value(self.children[0].execute(variables))
+            if self.arity == 1:
+                returnValue = self.value(self.children[0].execute(variables))
+                #return self.value(self.children[0].execute(variables))
 
-        if self.arity == 2:
-            return self.value(self.children[0].execute(variables), self.children[1].execute(variables))
+            if self.arity == 2:
+                returnValue = self.value(self.children[0].execute(variables), self.children[1].execute(variables))
+                #return self.value(self.children[0].execute(variables), self.children[1].execute(variables))
         
-        return
+        except:
+            returnValue = nan
+          
+
+        return returnValue
 
