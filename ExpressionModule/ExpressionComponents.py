@@ -15,7 +15,6 @@ class ExpressionComponent(object):
     def __hash__(self):
         return hash(str(self))
 
-
 def div(x, y):
     if y == 0: return 0
     return x/y
@@ -32,18 +31,28 @@ def pow(x, y):
     if int(x) == x and int(y) == y and y < 0:
         y = float(y)
     return np.power(x, y)
- 
+
+def initializeComponentVariables(numberVar):
+    variables = []
+    indexes = np.arange(ord('x'), ord('x')+numberVar)
+    indexes = [i - 26 if i > ord('z') else i for i in indexes]    
+    for i in indexes:
+        var = chr(i)
+        variables.append(var)
+        components[var] = ExpressionComponent(var, 0)   
+    return variables    
+
 components = {  "0" : ExpressionComponent(0, 0),
                 "1" : ExpressionComponent(1, 0),
                 "2" : ExpressionComponent(2, 0),
-                "x" :ExpressionComponent("x", 0),
+                "x" : ExpressionComponent("x", 0),
                 "add": ExpressionComponent(np.add, 2),
                 "sub": ExpressionComponent(np.subtract, 2),
                 "mul": ExpressionComponent(np.multiply, 2),
-                "div": ExpressionComponent(div, 2),
+                "div": ExpressionComponent(np.divide, 2),
                 "cos": ExpressionComponent(np.cos, 1),
                 "sin": ExpressionComponent(np.sin, 1),
                 "pow": ExpressionComponent(np.power, 2),
-                #"ln": ExpressionComponent(ln, 1)
+                "ln": ExpressionComponent(np.log, 1)
                 }
 

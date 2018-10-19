@@ -7,12 +7,12 @@ from collections import namedtuple
 from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
-from ExpressionModule.ExpressionComponents import components
+from ExpressionModule.ExpressionComponents import initializeComponentVariables, components
 from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self, objective=None, lower=-10, upper=10, step=41):
+    def __init__(self, objective=None,variables=1, lower=-10, upper=10, step=41):
         self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 5 
@@ -22,10 +22,23 @@ class ExpressionHandler(SolutionHandler):
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
+        self.variables = initializeComponentVariables(variables)
+        self.initializeSamples()
         prepareLogDirectory("logs/")
         prepareLogDirectory("logs/iterations/")
         self.y_true = self.executeTree(self.buildTree(objective)) 
         self.logExpression(objective, "objective.csv")
+
+    def initializeSamples(self):
+        testValues = np.linspace(self.lower, self.upper, self.step)
+        self.samples = []
+        samples = 30
+        for i in range(samples):
+            sample = []
+            for var in self.variables:
+                sample.append(random.choice(testValues))
+            self.samples.append(sample)
+        #logging.info(self.samples)
 
     def initializeStatistics(self):
         self.statistics = {}
@@ -63,6 +76,9 @@ class ExpressionHandler(SolutionHandler):
 
     def getRolloutReward(self, partialSolution):
         mse = self.getMSE(partialSolution)
+        
+        # this is just for safety, infinities should have
+        # been handled in getMSE 
         mse = sys.maxint if np.isinf(mse) else mse
         mse = -sys.maxint if np.isneginf(mse) else mse      
         
@@ -81,8 +97,6 @@ class ExpressionHandler(SolutionHandler):
             if solutionHash not in self.zeroErrorSolutionHashs:
                 self.zeroErrorSolution.append(partialSolution)
                 self.zeroErrorSolutionHashs.append(solutionHash)
-        #else:
-        #    mse = -mse
 
         #logging.info("Expression Result for x=5: "+str(rootNode.execute({"x":5})))
         #logging.info("Objective Result for x=5: "+str(objectiveRootNode.execute({"x":5})))
@@ -94,13 +108,14 @@ class ExpressionHandler(SolutionHandler):
         rootNode = self.buildTree(partialSolution)
         y_pred = self.executeTree(rootNode)
         logging.info(y_pred)
+
+        # if a nan is found in the function results, return biggest error possible
         if (np.isnan(y_pred).any()):
-            logging.info("Returning maxint")
             return sys.maxint
-        #y_pred = np.nan_to_num(y_pred)
+
+        # if there are any infinities, we change then to max int
         y_pred = np.clip(y_pred, -sys.maxint, sys.maxint)
-        #y_pred[np.isinf(y_pred)] = sys.maxint
-        #y_pred[np.isneginf(y_pred)] = -sys.maxint
+        
         logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
         return mse
@@ -114,10 +129,20 @@ class ExpressionHandler(SolutionHandler):
 
     def executeTree(self, rootNode):
         y_pred = []
-        testValues = np.linspace(self.lower, self.upper, self.step)
-        for v in testValues:
-            expressionResult = rootNode.execute({"x":v})
+
+        # random sampling
+        for sample in self.samples:
+            varValues = dict(zip(self.variables, sample))
+            expressionResult = rootNode.execute(varValues)
             y_pred.append(expressionResult)
+            #logging.info(varValues)
+
+        #testValues = np.linspace(self.lower, self.upper, self.step)
+        # homogeneous, equally-spaced sampling
+        #for v in testValues:
+        #    expressionResult = rootNode.execute({"x":v})
+        #    y_pred.append(expressionResult)
+        
         return y_pred
 
     def getNumberTerminalsAllowed(self, partialSolution=None):
