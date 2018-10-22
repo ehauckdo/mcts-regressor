@@ -33,6 +33,8 @@ def pow(x, y):
     return np.power(x, y)
 
 def initializeComponentVariables(numberVar):
+    if numberVar > 26:
+         raise ValueError("Expressions with more than 26 variables are not currently acceptable")
     variables = []
     indexes = np.arange(ord('x'), ord('x')+numberVar)
     indexes = [i - 26 if i > ord('z') else i for i in indexes]    

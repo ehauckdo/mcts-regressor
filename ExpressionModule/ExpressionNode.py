@@ -31,7 +31,7 @@ class ExpressionNode(object):
                     returnValue = variables[self.value]
                     #return variables[self.value]
                 elif self.value == "x":
-                    logging.error("This should not happen. X found in the tree")
+                    raise ValueError("Variable was not converted to a number during execution")
                 else:
                     returnValue = self.value
                     #return self.value
