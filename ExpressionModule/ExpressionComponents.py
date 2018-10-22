@@ -47,7 +47,6 @@ def initializeComponentVariables(numberVar):
 components = {  "0" : ExpressionComponent(0, 0),
                 "1" : ExpressionComponent(1, 0),
                 "2" : ExpressionComponent(2, 0),
-                "x" : ExpressionComponent("x", 0),
                 "add": ExpressionComponent(np.add, 2),
                 "sub": ExpressionComponent(np.subtract, 2),
                 "mul": ExpressionComponent(np.multiply, 2),

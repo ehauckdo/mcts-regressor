@@ -1,6 +1,7 @@
 import random
 import logging
 import sys
+import math
 import os, shutil
 import numpy as np
 from collections import namedtuple
@@ -13,7 +14,7 @@ from Utility.Utility import prepareLogDirectory
 class ExpressionHandler(SolutionHandler):
 
     def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, step=41):
-        self.objective = objective
+        #self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 5 
         self.lower = lower
@@ -27,10 +28,28 @@ class ExpressionHandler(SolutionHandler):
         self.loggingDirectory = "logs/"+folder+"/" 
         prepareLogDirectory(self.loggingDirectory)
         prepareLogDirectory(self.loggingDirectory+"iterations/")
-        self.y_true = self.executeTree(self.buildTree(objective)) 
-        self.logExpression(objective, "objective.csv")
+        self.setObjective(objective)
+        #self.y_true = self.executeTree(self.buildTree(objective)) 
+
+    def setObjective(self, objective):
+        if type(objective) is list:
+            self.objective = objective
+        else:
+            parts = []
+            for elem in objective.split():
+                parts.append(components[elem])
+            self.objective = parts
+        self.y_true = self.executeTree(self.buildTree(self.objective))
+        # if any of the sample values generate nan, delete them from sample list
+        for i in reversed(range(len(self.y_true))):
+            logging.info(self.y_true[i])
+            if math.isnan(self.y_true[i]):
+                del self.y_true[i]
+                del self.samples[i]
+        self.logExpression(self.objective, "objective.csv")
 
     def initializeSamples(self):
+        #random.seed(1)
         testValues = np.linspace(self.lower, self.upper, self.step)
         self.samples = []
         samples = 30
@@ -39,7 +58,7 @@ class ExpressionHandler(SolutionHandler):
             for var in self.variables:
                 sample.append(random.choice(testValues))
             self.samples.append(sample)
-        #logging.info(self.samples)
+        logging.info(self.samples)
 
     def initializeStatistics(self):
         self.statistics = {}
@@ -191,7 +210,7 @@ class ExpressionHandler(SolutionHandler):
         with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
             f.write("{0:.2f}".format(mse)+"\n")
-            f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
+            f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(self.samples, y_pred)]))
 
     def logSearch(self):
         stats = self.statistics

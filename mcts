@@ -3,6 +3,7 @@
 import sys
 import logging
 import optparse
+import random
 from MCTS import MCTS 
 from ExpressionModule.ExpressionComponents import components as c
 from ExpressionModule.ExpressionHandler import ExpressionHandler
@@ -21,25 +22,27 @@ def parseArgs(args):
         help="Objective function in polish notation", default="add add mul x x x 2")
     parser.add_option('-d', action="store", type="int", dest="depth",
         help="The maximum tree depth", default=7)
+    parser.add_option('-s', action="store", type="int", dest="seed",
+        help="Seed for this execution", default=0)
    
     (opt, args) = parser.parse_args()
     
-    objective = []
-    for s in opt.objective.split():
-        objective.append(c[s])
-    opt.objective = objective
+    #objective = []
+    #for s in opt.objective.split():
+    #    objective.append(c[s])
+    #opt.objective = objective
     return opt
 
 def main(args):
     opt = parseArgs(args)  
- 
+    random.seed(opt.seed)
     #my_objective = [ c["add"], c["ln"], c["add"], c["x"], c["1"], c["ln"], c["add"], c["pow"], c["x"], c["2"], c["1"] ]  
     #my_objective = [c["mul"], c["mul"], c["x"], c["x"], c["x"]]
     #my_objective = [c["add"], c["add"], c["mul"], c["x"], c["x"], c["x"], c["2"]]
  
     handlerObject = ExpressionHandler(opt.objective, opt.numvars, opt.folder)
     handlerObject.maxSolutionSize = opt.depth
-    logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
+    #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
 
     mcts = MCTS(handlerObject, 200000)
     mcts.run()

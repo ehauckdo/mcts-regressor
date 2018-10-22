@@ -12,7 +12,6 @@ printlog = True
 class SearchNode(object):
 
     def __init__(self, handler=SolutionHandler(), parent=None, components=[]):
-        random.seed(1)
         self.components = components
         self.parent = parent
         self.handler = handler
