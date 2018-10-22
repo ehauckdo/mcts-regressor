@@ -1,0 +1,49 @@
+#! /usr/bin/env python
+
+import sys
+import logging
+import optparse
+from MCTS import MCTS 
+from ExpressionModule.ExpressionComponents import components as c
+from ExpressionModule.ExpressionHandler import ExpressionHandler
+
+def parseArgs(args):
+    usage = "usage: %prog [options]"
+    parser = optparse.OptionParser(usage=usage)    
+
+    parser.add_option('-l', action="store", type="string", dest="folder",
+        help="Select the folder to save results", default="")
+    parser.add_option('-v', action="store", type="int", dest="numvars",
+        help="The number of variables to use for regression", default=1)
+    parser.add_option('-i', action="store", type="int", dest="iterations",
+        help="The number of MCTS iterations", default=5000)
+    parser.add_option('-o', action="store", type="string", dest="objective",
+        help="Objective function in polish notation", default="add add mul x x x 2")
+    parser.add_option('-d', action="store", type="int", dest="depth",
+        help="The maximum tree depth", default=7)
+   
+    (opt, args) = parser.parse_args()
+    
+    objective = []
+    for s in opt.objective.split():
+        objective.append(c[s])
+    opt.objective = objective
+    return opt
+
+def main(args):
+    opt = parseArgs(args)  
+ 
+    #my_objective = [ c["add"], c["ln"], c["add"], c["x"], c["1"], c["ln"], c["add"], c["pow"], c["x"], c["2"], c["1"] ]  
+    #my_objective = [c["mul"], c["mul"], c["x"], c["x"], c["x"]]
+    #my_objective = [c["add"], c["add"], c["mul"], c["x"], c["x"], c["x"], c["2"]]
+ 
+    handlerObject = ExpressionHandler(opt.objective, opt.numvars)
+    handlerObject.maxSolutionSize = opt.depth
+    logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
+
+    mcts = MCTS(handlerObject, 200000)
+    mcts.run()
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
+
