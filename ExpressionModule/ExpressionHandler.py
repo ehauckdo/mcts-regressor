@@ -12,7 +12,7 @@ from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self, objective=None,variables=1, lower=-10, upper=10, step=41):
+    def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, step=41):
         self.objective = objective
         self.partialSolution = []
         self.maxSolutionSize = 5 
@@ -24,8 +24,9 @@ class ExpressionHandler(SolutionHandler):
         self.initializeStatistics()
         self.variables = initializeComponentVariables(variables)
         self.initializeSamples()
-        prepareLogDirectory("logs/")
-        prepareLogDirectory("logs/iterations/")
+        self.loggingDirectory = "logs/"+folder+"/" 
+        prepareLogDirectory(self.loggingDirectory)
+        prepareLogDirectory(self.loggingDirectory+"iterations/")
         self.y_true = self.executeTree(self.buildTree(objective)) 
         self.logExpression(objective, "objective.csv")
 
@@ -187,14 +188,14 @@ class ExpressionHandler(SolutionHandler):
         rootNode = self.buildTree(expression)
         y_pred = self.executeTree(rootNode)
         mse = self.getMSE(expression)
-        with open('logs/'+fileName, 'w') as f:
+        with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
             f.write("{0:.2f}".format(mse)+"\n")
             f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(np.linspace(self.lower, self.upper, self.step), y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
-        with open("logs/search.csv", "a") as myfile:
+        with open(self.loggingDirectory+"search.csv", "a") as myfile:
             myfile.write(" ".join([str(stats["iterations"]), "{0:.2f}".format(stats["bestError"])]))
             myfile.write("\n")
 
