@@ -22,6 +22,7 @@ class SearchNode(object):
         self.depth = 0 if parent == None else parent.depth + 1    
         self.bounds = [sys.maxint, -sys.maxint]
         self.fullyExpanded = False
+        self.fullyExplored = False
         self.initChildrenList()        
        
     def initChildrenList(self):
@@ -46,6 +47,34 @@ class SearchNode(object):
         node = self.treePolicy()
         reward = node.rollOut()
         node.backup(reward)
+        #self.checkTerminalNode(node)
+
+    def checkTerminalNode(self, node):
+        # is it a terminal node
+        while len(node.children) is 0:
+            logging.info("FOUND TERMINAL NODE!")
+            logging.info("Component: "+str(node.components[0])+", Depth: "+str(node.depth))
+            # just a security check, currently not needed        
+            if len(node.components) is 1 and node.depth > 0: 
+                childRef = node.components[0]
+                node = node.parent
+                del node.children[childRef]
+            logging.info("Node deleted! Now at parent at depth: "+str(node.depth))
+
+        if len(node.children) is 0:
+            logging.info("FULLY EXPANDED")
+            if len(node.components) is 1: 
+                reference = node.components[0]
+                node = node.parent
+                del node.children[reference]
+
+        #while 
+           
+    def isFullyExplored(self):
+        for component, node in self.children.iteritems():
+             if node.fullyExplored == False:
+                return False
+        return True 
 
     def treePolicy(self):
         logging.info("Executing Tree Policy...")

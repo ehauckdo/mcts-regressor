@@ -16,6 +16,11 @@ class ExpressionHandler(SolutionHandler):
     def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, step=41):
         #self.objective = objective
         self.partialSolution = []
+        #self.loggingDirectory = "logs/"+folder+"/" 
+        self.loggingDirectory = folder 
+        #prepareLogDirectory(self.loggingDirectory)
+        #prepareLogDirectory(self.loggingDirectory+"iterations/")
+        #logging.basicConfig(self.loggingDirectory+"/log",level=logging.INFO, filemode='w')
         self.maxSolutionSize = 5 
         self.lower = lower
         self.upper = upper
@@ -25,9 +30,6 @@ class ExpressionHandler(SolutionHandler):
         self.initializeStatistics()
         self.variables = initializeComponentVariables(variables)
         self.initializeSamples()
-        self.loggingDirectory = "logs/"+folder+"/" 
-        prepareLogDirectory(self.loggingDirectory)
-        prepareLogDirectory(self.loggingDirectory+"iterations/")
         self.setObjective(objective)
         #self.y_true = self.executeTree(self.buildTree(objective)) 
 
@@ -40,12 +42,13 @@ class ExpressionHandler(SolutionHandler):
                 parts.append(components[elem])
             self.objective = parts
         self.y_true = self.executeTree(self.buildTree(self.objective))
-        # if any of the sample values generate nan, delete them from sample list
+        # if any of the samples generate nan, delete them from sample list
         for i in reversed(range(len(self.y_true))):
-            logging.info(self.y_true[i])
             if math.isnan(self.y_true[i]):
                 del self.y_true[i]
                 del self.samples[i]
+        # if any of the samples generate infinity, clip between maxints
+        self.y_true = np.clip(self.y_true, -sys.maxint, sys.maxint)
         self.logExpression(self.objective, "objective.csv")
 
     def initializeSamples(self):
@@ -63,7 +66,7 @@ class ExpressionHandler(SolutionHandler):
     def initializeStatistics(self):
         self.statistics = {}
         self.statistics["bestSolution"] = None
-        self.statistics["bestError"] = sys.maxint
+        self.statistics["bestError"] = np.inf #sys.maxint
         self.statistics["iterations"] = 0
 
     def getPossibleChildren(self, partialSolution):
@@ -99,8 +102,8 @@ class ExpressionHandler(SolutionHandler):
         
         # this is just for safety, infinities should have
         # been handled in getMSE 
-        mse = sys.maxint if np.isinf(mse) else mse
-        mse = -sys.maxint if np.isneginf(mse) else mse      
+        #mse = sys.maxint if np.isinf(mse) else mse
+        #mse = -sys.maxint if np.isneginf(mse) else mse      
         
         self.statistics["iterations"] +=1
 
@@ -108,6 +111,7 @@ class ExpressionHandler(SolutionHandler):
            (mse == self.statistics["bestError"] and len(partialSolution) < len(self.statistics["bestSolution"]))):
             self.statistics["bestError"] = mse
             self.statistics["bestSolution"] = partialSolution
+            logging.info("Solution with best error found so far. Logging...")
             self.logSearch()
             self.logExpression(self.statistics["bestSolution"], "iterations/"+str(self.statistics["iterations"])+".csv")
         
@@ -127,16 +131,17 @@ class ExpressionHandler(SolutionHandler):
     def getMSE(self, partialSolution):
         rootNode = self.buildTree(partialSolution)
         y_pred = self.executeTree(rootNode)
-        logging.info(y_pred)
 
+        #logging.info(", ".join(["{0:.2f}".format(elem) for elem in y_pred]))
+        logging.info(y_pred)
         # if a nan is found in the function results, return biggest error possible
         if (np.isnan(y_pred).any()):
             return sys.maxint
 
         # if there are any infinities, we change then to max int
         y_pred = np.clip(y_pred, -sys.maxint, sys.maxint)
-        
-        logging.info(y_pred)
+
+        #logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
         return mse
     

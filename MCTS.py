@@ -4,7 +4,7 @@ import time
 from SearchNode import SearchNode
 from SolutionHandler import SolutionHandler
 
-logging.basicConfig(filename='log',level=logging.INFO, filemode='w')
+#logging.basicConfig(filename='log',level=logging.INFO, filemode='w')
 
 class MCTS(object):
 

@@ -7,6 +7,7 @@ import random
 from MCTS import MCTS 
 from ExpressionModule.ExpressionComponents import components as c
 from ExpressionModule.ExpressionHandler import ExpressionHandler
+from Utility.Utility import prepareLogDirectory
 
 def parseArgs(args):
     usage = "usage: %prog [options]"
@@ -27,25 +28,28 @@ def parseArgs(args):
    
     (opt, args) = parser.parse_args()
     
-    #objective = []
-    #for s in opt.objective.split():
-    #    objective.append(c[s])
-    #opt.objective = objective
     return opt
 
 def main(args):
     opt = parseArgs(args)  
-    random.seed(opt.seed)
+    #random.seed(opt.seed)
     #my_objective = [ c["add"], c["ln"], c["add"], c["x"], c["1"], c["ln"], c["add"], c["pow"], c["x"], c["2"], c["1"] ]  
     #my_objective = [c["mul"], c["mul"], c["x"], c["x"], c["x"]]
     #my_objective = [c["add"], c["add"], c["mul"], c["x"], c["x"], c["x"], c["2"]]
- 
-    handlerObject = ExpressionHandler(opt.objective, opt.numvars, opt.folder)
-    handlerObject.maxSolutionSize = opt.depth
-    #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
+    index = 0
+    for i in range(20):
+        loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
+        prepareLogDirectory(loggingFolder)
+        prepareLogDirectory(loggingFolder+"iterations/")
+        logging.basicConfig(filename=loggingFolder+"log",level=logging.INFO, filemode='w')
 
-    mcts = MCTS(handlerObject, 200000)
-    mcts.run()
+        handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder)
+        handlerObject.maxSolutionSize = opt.depth
+        #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
+
+        mcts = MCTS(handlerObject, 50000)
+        mcts.run()
+        index += 1
 
 if __name__ == '__main__':
     main(sys.argv[1:])
