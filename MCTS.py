@@ -20,7 +20,7 @@ class MCTS(object):
         if len(self.handler.zeroErrorSolution) > 0:
             for sol in self.handler.zeroErrorSolution:
                 print("Solution option: \n"+"\n".join(self.handler.printComponents(sol)))
-        else:
-            result = self.root.bestBranch()
-            print("Best brach: \n"+"\n".join(self.handler.printComponents(result)))
+        #else:
+        #    result = self.root.bestBranch()
+        #    print("Best brach: \n"+"\n".join(self.handler.printComponents(result)))
 

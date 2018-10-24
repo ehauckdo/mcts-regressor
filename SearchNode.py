@@ -7,8 +7,6 @@ import numpy as np
 from Utility.Utility import normalize
 from SolutionHandler import SolutionHandler
 
-printlog = True
-
 class SearchNode(object):
 
     def __init__(self, handler=SolutionHandler(), parent=None, components=[]):
@@ -147,7 +145,7 @@ class SearchNode(object):
         while self.handler.expandSolution(componentHolder) == True:
             current_depth += 1 
 
-        logging.info("Rollouted expression: \n"+"\n".join(self.handler.printComponents(componentHolder)))
+        logging.info("Rollouted expression: \n"+" ".join(self.handler.printExpression(componentHolder)))
         reward = self.handler.getRolloutReward(componentHolder)
         reward = sys.maxint if np.isinf(reward) else reward
         reward = -sys.maxint if np.isneginf(reward) else reward

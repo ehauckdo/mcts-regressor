@@ -8,7 +8,7 @@ from collections import namedtuple
 from sklearn.metrics import mean_squared_error
 from SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
-from ExpressionModule.ExpressionComponents import initializeComponentVariables, components
+from ExpressionModule.ExpressionComponents import initializeComponentVariables, components, components_reversed
 from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
@@ -133,7 +133,7 @@ class ExpressionHandler(SolutionHandler):
         y_pred = self.executeTree(rootNode)
 
         #logging.info(", ".join(["{0:.2f}".format(elem) for elem in y_pred]))
-        logging.info(y_pred)
+        #logging.info(y_pred)
         # if a nan is found in the function results, return biggest error possible
         if (np.isnan(y_pred).any()):
             return sys.maxint
@@ -143,6 +143,7 @@ class ExpressionHandler(SolutionHandler):
 
         #logging.info(y_pred)
         mse = mean_squared_error(self.y_true, y_pred)
+        logging.info("MSE: "+str(mse))
         return mse
     
     def buildTree(self, partialSolution):
@@ -201,11 +202,12 @@ class ExpressionHandler(SolutionHandler):
 
         string = []
         for i in range(len(partialSolution)):
-            try:
-                component = partialSolution[i].value.__name__
-            except:
-                component = str(partialSolution[i].value)
-            string.append(component)
+            #try:
+            #    component = partialSolution[i].value.__name__
+            #except:
+            #    component = str(partialSolution[i].value)
+            #string.append(str(partialSolution[i]))
+            string.append(components_reversed[str(partialSolution[i])])
         return string
 
     def logExpression(self, expression, fileName="loggedExpression.csv"):

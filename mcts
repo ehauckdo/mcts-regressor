@@ -30,6 +30,15 @@ def parseArgs(args):
     
     return opt
 
+def resetLoggingModule(folder):
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    
+    prepareLogDirectory(folder)
+    prepareLogDirectory(folder+"iterations/")
+    
+    logging.basicConfig(filename=folder+"log",level=logging.INFO, filemode='w')
+
 def main(args):
     opt = parseArgs(args)  
     #random.seed(opt.seed)
@@ -37,12 +46,9 @@ def main(args):
     #my_objective = [c["mul"], c["mul"], c["x"], c["x"], c["x"]]
     #my_objective = [c["add"], c["add"], c["mul"], c["x"], c["x"], c["x"], c["2"]]
     index = 0
-    for i in range(20):
+    for i in range(50):
         loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
-        prepareLogDirectory(loggingFolder)
-        prepareLogDirectory(loggingFolder+"iterations/")
-        logging.basicConfig(filename=loggingFolder+"log",level=logging.INFO, filemode='w')
-
+        resetLoggingModule(loggingFolder)
         handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder)
         handlerObject.maxSolutionSize = opt.depth
         #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))

@@ -2,6 +2,7 @@ from __future__ import division
 import inspect
 import numpy as np
 import math
+import logging
 
 class ExpressionComponent(object):
 
@@ -41,7 +42,9 @@ def initializeComponentVariables(numberVar):
     for i in indexes:
         var = chr(i)
         variables.append(var)
-        components[var] = ExpressionComponent(var, 0)   
+        component = ExpressionComponent(var, 0) 
+        components[var] = component
+        components_reversed[str(component)] = var   
     return variables    
 
 components = {  "0" : ExpressionComponent(0, 0),
@@ -57,3 +60,5 @@ components = {  "0" : ExpressionComponent(0, 0),
                 "ln": ExpressionComponent(np.log, 1)
                 }
 
+# a reverse mapping to facilitate readable expression constrution
+components_reversed = {str(v): k for k, v in components.iteritems()}
