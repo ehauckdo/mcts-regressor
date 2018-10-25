@@ -1,10 +1,8 @@
-#! /usr/bin/env python
-
 import csv
 import sys
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import numpy as np
-from Utility.Utility import prepareLogDirectory, getFilesFromDirectory 
+from Utility.Utility import prepareLogDirectory, getFilesFromDirectory
 
 def parseExpressionFile(fileName):
     x, fx = [], []
@@ -55,13 +53,13 @@ def plotAll(data, objective, plots=0.5):
         fx = expressionInfo[3]
         labels.append(str(key)+" - "+expression+" (MSE: "+str(mse)+")")
         plt.plot(x, fx, color=color)
-    
+
     labels.append(objective[0])
     plt.plot(objective[2],objective[3],'--')
 
     plt.xlabel('Iterations')
     plt.ylabel('Error')
-    plt.legend(tuple(labels), loc='upper left') 
+    plt.legend(tuple(labels), loc='upper left')
     plt.grid(True)
     displayAndSave("All_Functions"+"_".join(objective[0].split()))
 
@@ -81,7 +79,7 @@ def plotTwoByTwo(data, objective):
         fx = expressionInfo[3]
         plt.plot(x, fx)
         exprLabel = str(iteration)+": "+expression+" (MSE: "+str(mse)+")"
-        plt.legend((objectiveLabel, exprLabel), loc='upper left') 
+        plt.legend((objectiveLabel, exprLabel), loc='upper left')
         plt.grid(True)
         figureIndex += 1
         if figureIndex >= 327:
@@ -110,20 +108,4 @@ def plotSearchStep():
     plt.grid(True)
     plt.title("Search Progression")
     displayAndSave("SearchProgress")
-
-def main(args):
-    prepareLogDirectory("figs/")
-
-    expr = fetchExpressions("logs/iterations")
-    objective = fetchObjective("logs/")    
-   
-    plotAll(expr, objective)
-    plotSearchStep()
-    plotTwoByTwo(expr, objective)
-
-    #expr["Objective"] = objective
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
-
 
