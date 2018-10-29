@@ -49,7 +49,7 @@ class ExpressionHandler(SolutionHandler):
                 del self.samples[i]
         # if any of the samples generate infinity, clip between maxints
         self.y_true = np.clip(self.y_true, -sys.maxint, sys.maxint)
-        self.logExpression(self.objective, "objective.csv")
+        self.logExpression(self.objective, "objective.csv", self.y_true)
 
     def initializeSamples(self):
         #random.seed(1)
@@ -210,9 +210,10 @@ class ExpressionHandler(SolutionHandler):
             string.append(components_reversed[str(partialSolution[i])])
         return string
 
-    def logExpression(self, expression, fileName="loggedExpression.csv"):
-        rootNode = self.buildTree(expression)
-        y_pred = self.executeTree(rootNode)
+    def logExpression(self, expression, fileName="loggedExpression.csv", y_pred=None):
+        if y_pred is None:
+            rootNode = self.buildTree(expression)
+            y_pred = self.executeTree(rootNode)
         mse = self.getMSE(expression)
         with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
