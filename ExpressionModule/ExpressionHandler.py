@@ -13,7 +13,7 @@ from Utility.Utility import prepareLogDirectory
 
 class ExpressionHandler(SolutionHandler):
 
-    def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, step=41):
+    def __init__(self, objective=None,variables=1, folder="default", lower=-10, upper=10, points=100, numberSamples=50):
         #self.objective = objective
         self.partialSolution = []
         #self.loggingDirectory = "logs/"+folder+"/" 
@@ -24,7 +24,8 @@ class ExpressionHandler(SolutionHandler):
         self.maxSolutionSize = 5 
         self.lower = lower
         self.upper = upper
-        self.step = step
+        self.points = points
+        self.numberSamples = numberSamples
         self.zeroErrorSolution = []
         self.zeroErrorSolutionHashs = []
         self.initializeStatistics()
@@ -53,10 +54,9 @@ class ExpressionHandler(SolutionHandler):
 
     def initializeSamples(self):
         #random.seed(1)
-        testValues = np.linspace(self.lower, self.upper, self.step)
+        testValues = np.linspace(self.lower, self.upper, self.points)
         self.samples = []
-        samples = 30
-        for i in range(samples):
+        for i in range(self.numberSamples):
             sample = []
             for var in self.variables:
                 sample.append(random.choice(testValues))
@@ -163,7 +163,7 @@ class ExpressionHandler(SolutionHandler):
             y_pred.append(expressionResult)
             #logging.info(varValues)
 
-        #testValues = np.linspace(self.lower, self.upper, self.step)
+        #testValues = np.linspace(self.lower, self.upper, self.points)
         # homogeneous, equally-spaced sampling
         #for v in testValues:
         #    expressionResult = rootNode.execute({"x":v})

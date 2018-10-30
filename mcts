@@ -25,9 +25,9 @@ def parseArgs(args):
         help="The maximum tree depth", default=7)
     parser.add_option('-s', action="store", type="int", dest="seed",
         help="Seed for this execution", default=0)
-    parser.add_option('--lower', action="store", type="int", dest="lower",
+    parser.add_option('--lower', action="store", type="float", dest="lower",
         help="Lower value for samples", default=-10)
-    parser.add_option('--upper', action="store", type="int", dest="upper",
+    parser.add_option('--upper', action="store", type="float", dest="upper",
         help="Upper value for samples", default=10)
     parser.add_option('--samples', action="store", type="int", dest="samples",
         help="Upper value for samples", default=40)
