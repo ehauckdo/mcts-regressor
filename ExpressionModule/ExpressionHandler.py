@@ -217,13 +217,13 @@ class ExpressionHandler(SolutionHandler):
         mse = self.getMSE(expression)
         with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
-            f.write("{0:.2f}".format(mse)+"\n")
+            f.write("{0:.5f}".format(mse)+"\n")
             f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(self.samples, y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
         with open(self.loggingDirectory+"search.csv", "a") as myfile:
-            myfile.write(" ".join([str(stats["iterations"]), "{0:.2f}".format(stats["bestError"])]))
+            myfile.write(" ".join([str(stats["iterations"]), "{0:.5f}".format(stats["bestError"])]))
             myfile.write("\n")
 
     

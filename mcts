@@ -29,8 +29,10 @@ def parseArgs(args):
         help="Lower value for samples", default=-10)
     parser.add_option('--upper', action="store", type="float", dest="upper",
         help="Upper value for samples", default=10)
+    parser.add_option('--points', action="store", type="int", dest="points",
+        help="Number of equally spaced points between upper and lower bounds", default=100)
     parser.add_option('--samples', action="store", type="int", dest="samples",
-        help="Upper value for samples", default=40)
+        help="Number of samples to be selected from domain", default=50)
    
     (opt, args) = parser.parse_args()
     
@@ -55,7 +57,7 @@ def main(args):
     for i in range(50):
         loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
         resetLoggingModule(loggingFolder)
-        handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder, opt.lower, opt.upper, opt.samples)
+        handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder, opt.lower, opt.upper, opt.points, opt.samples)
         handlerObject.maxSolutionSize = opt.depth
         #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
 
