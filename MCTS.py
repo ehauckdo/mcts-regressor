@@ -8,7 +8,7 @@ from SolutionHandler import SolutionHandler
 
 class MCTS(object):
 
-    def __init__(self, handler=SolutionHandler(), iterations=5000):
+    def __init__(self, handler=SolutionHandler(), iterations=50000):
         self.iterations = iterations
         self.handler = handler
         self.root = SearchNode(handler)

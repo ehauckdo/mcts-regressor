@@ -18,7 +18,7 @@ def parseArgs(args):
     parser.add_option('-v', action="store", type="int", dest="numvars",
         help="The number of variables to use for regression", default=1)
     parser.add_option('-i', action="store", type="int", dest="iterations",
-        help="The number of MCTS iterations", default=5000)
+        help="The number of MCTS iterations", default=50000)
     parser.add_option('-o', action="store", type="string", dest="objective",
         help="Objective function in polish notation", default="add add mul x x x 2")
     parser.add_option('-d', action="store", type="int", dest="depth",

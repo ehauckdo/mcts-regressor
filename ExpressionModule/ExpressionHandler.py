@@ -218,7 +218,8 @@ class ExpressionHandler(SolutionHandler):
         with open(self.loggingDirectory+fileName, 'w') as f:
             f.write(" ".join(self.printExpression(expression))+"\n")
             f.write("{0:.5f}".format(mse)+"\n")
-            f.write("\n".join([str(x)+" "+str(fx) for x, fx in zip(self.samples, y_pred)]))
+            
+            f.write("\n".join([' '.join([str(s) for s in x])+" "+str(fx) for x, fx in zip(self.samples, y_pred)]))
 
     def logSearch(self):
         stats = self.statistics
