@@ -6,7 +6,7 @@ import os, shutil
 import numpy as np
 from collections import namedtuple
 from sklearn.metrics import mean_squared_error
-from SolutionHandler import SolutionHandler
+from MCTS.SolutionHandler import SolutionHandler
 from ExpressionModule.ExpressionNode import ExpressionNode
 from ExpressionModule.ExpressionComponents import initializeComponentVariables, components, components_reversed
 from Utility.Utility import prepareLogDirectory

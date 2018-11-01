@@ -4,7 +4,7 @@ import sys
 import logging
 import optparse
 import random
-from MCTS import MCTS 
+from MCTS.MCTS import MCTS 
 from ExpressionModule.ExpressionComponents import components as c
 from ExpressionModule.ExpressionHandler import ExpressionHandler
 from Utility.Utility import prepareLogDirectory
@@ -24,7 +24,7 @@ def parseArgs(args):
     parser.add_option('-d', action="store", type="int", dest="depth",
         help="The maximum tree depth", default=7)
     parser.add_option('-s', action="store", type="int", dest="seed",
-        help="Seed for this execution", default=0)
+        help="Seed for this execution", default=None)
     parser.add_option('--lower', action="store", type="float", dest="lower",
         help="Lower value for samples", default=-10)
     parser.add_option('--upper', action="store", type="float", dest="upper",
@@ -49,10 +49,10 @@ def resetLoggingModule(folder):
 
 def main(args):
     opt = parseArgs(args)
-    #random.seed(opt.seed)
-    #my_objective = [ c["add"], c["ln"], c["add"], c["x"], c["1"], c["ln"], c["add"], c["pow"], c["x"], c["2"], c["1"] ]  
-    #my_objective = [c["mul"], c["mul"], c["x"], c["x"], c["x"]]
-    #my_objective = [c["add"], c["add"], c["mul"], c["x"], c["x"], c["x"], c["2"]]
+
+    if opt.seed != None:
+        random.seed(opt.seed)
+
     index = 0
     for i in range(50):
         loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
