@@ -49,16 +49,19 @@ Options:
 
 ### How are expressions represented in MCTS?
 
-In this implementation of the Monte Carlo tree search, each node has no knowledge about what value it is storing or how much further down it can go in the tree. The ExpressionHandler (inherited from the general object SolutionHandler) is a single object that every node has access, and which is reponsible to return the appropriate value for these nodes. In other words, the SearchNode objects only know operations regarding the tree search, while the ExpressionHandler object only knows operations regarding expression manipulation. 
+In this implementation of the Monte Carlo tree search, each node has no knowledge about what value it is storing or how much further down it can go in the tree. Everyone node has access to a single handler object, which is reponsible to return the appropriate value to be stored on these nodes. In other words, the tree node objects only know operations regarding the tree search, while the handler object only knows operations regarding expression manipulation.
 
-The ExpressionHandler assign a ExpressionComponent to each tree node. ExpressionNodes can be either operators (e.g. +, -), in which case they have arity greater than 0, or terminals (e.g. 0, 1, x). Expressions are represented using reverse polish notation.
+The value to be stored at a single node is a component (or a list of components). A component can be either operators (e.g. +, -), or terminals (e.g. 0, 1, x). It is important to note that the representation of an expression within the tree search is different from the traditional expression tree. When a given expression in the tree search, given by a path from the node to a leaf node, is completed, this list of components are them converted to an expression tree. Refer to the image below to for a clear understanding. 
+
+![alt text](https://i.imgur.com/euJaDI4.png)
+
+From the image it is possible to notice that the expression in the tree search is represented in [reverse polish notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation). When setting an objective function through the command line, you must pass the function as a string using this notation. 
 
 ```
 Expression in infix notation: x² + 2x + 4
 Expression in reverse polish notation: add add pow x 2 mul 2 x add 2 2
 ```
 The currently implemeted operators and terminals are:
-
 ```
 "add": numpy.add
 "sub": numpy.ubtract
