@@ -89,6 +89,55 @@ def plotTwoByTwo(data, objective):
     if figureIndex > 321:
         displayAndSave("Two_by_two_"+str(fileNameIndex))
 
+def boxplot(logFolders):
+    functionStats = {}
+
+    figureIndex = 101
+    for f in logFolders:
+        figureIndex += 10
+
+    for function in logFolders:
+        functionStats[function] = {}
+        functionStats[function]["BestMSE"] = []
+        executionLogFolders = getFilesFromDirectory(function)
+        for executionLog in executionLogFolders:
+            logFiles = getFilesFromDirectory(executionLog)
+            for fileName in logFiles:
+                if "iterations" in fileName:
+                    bestError = 100000.0
+                    results = []
+                    iterations = getFilesFromDirectory(fileName)
+                    for iters in iterations:
+                        with open(iters,'r') as csvfile:
+                            lines = csv.reader(csvfile, delimiter=' ')
+                            expression = next(lines, None)
+                            mse = float(next(lines, None)[0])
+                            if mse < bestError:
+                                bestError = mse
+                                for row in lines:
+                                    variables = row[0]
+                                    fx = row[-1]
+                if "search" in fileName:
+                    mse = 0
+                    with open(fileName,'r') as csvfile:
+                        lines = csv.reader(csvfile, delimiter=' ')
+                        for row in lines:
+                            mse = row[1]
+                            pass
+                    if float(mse) < 50000.0:
+                        functionStats[function]["BestMSE"].append(mse)
+        functionStats[function]["BestMSE"] = [float(x) for x in functionStats[function]["BestMSE"]]
+
+        plt.subplot(figureIndex)
+        plt.boxplot(functionStats[function]["BestMSE"])
+
+        plt.xlabel(function)
+        plt.ylabel('Error')
+        plt.grid(True)
+        figureIndex += 1
+    plt.show()
+
+
 def displayAndSave(fileName):
     mng = plt.get_current_fig_manager()
     mng.resize(*mng.window.maxsize())
