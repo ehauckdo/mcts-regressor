@@ -25,6 +25,8 @@ def parseArgs(args):
         help="The maximum tree depth", default=7)
     parser.add_option('-s', action="store", type="int", dest="seed",
         help="Seed for this execution", default=None)
+    parser.add_option('-e', action="store", type="int", dest="executions",
+        help="How many executions of the MCTS", default=1)
     parser.add_option('--lower', action="store", type="float", dest="lower",
         help="Lower value for samples", default=-10)
     parser.add_option('--upper', action="store", type="float", dest="upper",
@@ -35,16 +37,17 @@ def parseArgs(args):
         help="Number of samples to be selected from domain", default=50)
    
     (opt, args) = parser.parse_args()
-    
     return opt
 
+
+# For multiple executions of MCTS, remove the current logging handler
+# and create a new one pointing to a log file in the appropriate folder
 def resetLoggingModule(folder):
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
     
     prepareLogDirectory(folder)
     prepareLogDirectory(folder+"iterations/")
-    
     logging.basicConfig(filename=folder+"log",level=logging.INFO, filemode='w')
 
 def main(args):
@@ -54,14 +57,14 @@ def main(args):
         random.seed(opt.seed)
 
     index = 0
-    for i in range(50):
+    for i in range(opt.executions):
         loggingFolder = "logs/"+opt.folder+"/"+str(index)+"/"
         resetLoggingModule(loggingFolder)
         handlerObject = ExpressionHandler(opt.objective, opt.numvars, loggingFolder, opt.lower, opt.upper, opt.points, opt.samples)
         handlerObject.maxSolutionSize = opt.depth
         #logging.info("Objective: "+"\n".join(handlerObject.printComponents(opt.objective)))
 
-        mcts = MCTS(handlerObject, 50000)
+        mcts = MCTS(handlerObject, opt.iterations)
         mcts.run()
         index += 1
 
