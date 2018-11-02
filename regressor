@@ -65,6 +65,8 @@ def main(args):
         mcts = MCTS(handlerObject, opt.iterations)
         mcts.run()
 
+        print("Best solution: "+" ".join(handlerObject.printExpression(handlerObject.statistics["bestSolution"])))
+
 if __name__ == '__main__':
     main(sys.argv[1:])
 
